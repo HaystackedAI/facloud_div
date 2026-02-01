@@ -44,7 +44,7 @@ class DivChunk(Base, BaseMixin):
     )
 
     embedding: Mapped[Optional[List[float]]] = mapped_column(
-        Vector(384),
+        Vector(1536),
         nullable=True,
     )
 
@@ -56,9 +56,3 @@ class DivChunk(Base, BaseMixin):
             unique=True,
         ),
     )
-
-
-
-# CREATE INDEX CONCURRENTLY ix_dividend_chunks_embedding_hnsw
-# ON dividend_chunks
-# USING hnsw (embedding vector_cosine_ops);

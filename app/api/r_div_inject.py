@@ -12,8 +12,20 @@ from app.service.ser_div_pipeline import DividendPipeline
 injRou = APIRouter()
 
 
+@injRou.post("/div_pipeline_4weeks")
+async def load_pipeline4weeks(
+    db: AsyncSession = Depends(get_db),
+):
+    count = await DividendPipeline.nasdaq_4w2pg(db)
+
+    return {
+        "status": "load to pg done",
+        "inserted": count,
+    }
+
+
 @injRou.post("/div_pipeline")
-async def load_dividends(
+async def load_pipeline(
     date: str = Query(..., example="2026-02-02"),
     db: AsyncSession = Depends(get_db),
 ):
@@ -24,8 +36,6 @@ async def load_dividends(
         "date": date,
         "inserted": count,
     }
-
-
 
 
 @injRou.post("/grab2csv")

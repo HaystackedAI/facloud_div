@@ -1,6 +1,7 @@
 {
     "files.exclude": {
         "**/__pycache__": true,
+		"**/__*__": true,
         ".venv": true,
         "v12": true,
         ".vscode": true,
@@ -8,7 +9,6 @@
         ".angular": true,
         "e2e": true,
         "LICENSE": true,
-        "package-lock.json": true,
         ".eslintrc.cjs": true,
         "desktop.ini": true
     },

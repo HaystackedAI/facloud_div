@@ -2,6 +2,7 @@
 import csv, pandas as pd
 from datetime import datetime
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.dialects.postgresql import insert
 
 from app.db.models.m_div import Div  # your ORM model
 
@@ -74,3 +75,44 @@ class DivDfLoader:
 
         await db.commit()
         return inserted
+
+
+
+    @staticmethod
+    async def upsert_df_symbol_only(db: AsyncSession, df: pd.DataFrame) -> int:
+        rows = []
+
+        for _, row in df.iterrows():
+            rows.append({
+                "company_name": row["companyName"],
+                "symbol": row["symbol"],
+                "dividend_ex_date": datetime.strptime(row["dividend_Ex_Date"], DATE_FMT).date(),
+                "record_date": datetime.strptime(row["record_Date"], DATE_FMT).date(),
+                "payment_date": datetime.strptime(row["payment_Date"], DATE_FMT).date(),
+                "dividend_rate": float(row["dividend_Rate"]),
+                "indicated_annual_dividend": float(row["indicated_Annual_Dividend"]),
+                "announcement_date": datetime.strptime(row["announcement_Date"], DATE_FMT).date(),
+            })
+
+        if not rows:
+            return 0
+
+        stmt = insert(Div).values(rows) 
+
+        stmt = stmt.on_conflict_do_update(
+            index_elements=["symbol"],
+            set_={
+                "company_name": stmt.excluded.company_name,
+                "dividend_ex_date": stmt.excluded.dividend_ex_date,
+                "record_date": stmt.excluded.record_date,
+                "payment_date": stmt.excluded.payment_date,
+                "dividend_rate": stmt.excluded.dividend_rate,
+                "indicated_annual_dividend": stmt.excluded.indicated_annual_dividend,
+                "announcement_date": stmt.excluded.announcement_date,
+                "updated_at": datetime.utcnow(),
+            },
+        )
+
+        res = await db.execute(stmt)
+        await db.commit()
+        return len(rows)
