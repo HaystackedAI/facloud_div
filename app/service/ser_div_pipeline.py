@@ -4,7 +4,7 @@ from datetime import date, timedelta
 import pandas as pd
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.service.ser_dividend_load import DivDfLoader
+from app.service.ser_div_load import DivDfLoader
 from app.service.ser_dividend_grab_nasdaq import grab_dividends_to_df
 
 
@@ -41,9 +41,11 @@ class DividendPipeline:
         end = start + timedelta(weeks=1)
 
         cur = start
+        print("start:", start, "end:", end)
         while cur <= end:
             try:
                 df = grab_dividends_to_df(target_date=cur.strftime("%Y-%m-%d"))
+                print(cur, "df.shape:", None if df is None else df.shape)
 
                 if df is None or df.empty:
                     cur += timedelta(days=1)

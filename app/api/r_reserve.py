@@ -6,7 +6,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.db.db_async import get_db
 
 from app.service.ser_dividend_grab_nasdaq import grab_dividends_to_csv
-from app.service.ser_dividend_load import DividendCsvLoader
+from app.service.ser_div_load import DividendCsvLoader
 
 from app.config import get_settings_singleton
 settings = get_settings_singleton()
@@ -18,7 +18,7 @@ FINNHUB_API_KEY = settings.FINNHUB_API_KEY
 reserveRou = APIRouter()
 
 @reserveRou.post("/grab")
-def grab_dividends(date: str = Query(..., examples="2026-01-30")):
+def grab_dividends(date: str = Query(..., example="2026-01-30")):
     csv_path = grab_dividends_to_csv(target_date=date)
 
     return {
@@ -29,7 +29,7 @@ def grab_dividends(date: str = Query(..., examples="2026-01-30")):
 
 @reserveRou.post("/load")
 async def load_dividends(
-    filename: str = Query(..., examples="dividends_2026-01-30.csv"),
+    filename: str = Query(..., example="dividends_2026-01-30.csv"),
     db: AsyncSession = Depends(get_db),
 ):
     count = await DividendCsvLoader.load_csv(db, filename)

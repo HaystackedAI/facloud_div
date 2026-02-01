@@ -50,12 +50,6 @@ class DivDfLoader:
 
     @staticmethod
     async def load_df(db: AsyncSession, df: pd.DataFrame) -> int:
-        """
-        Read a DataFrame and insert into DB.
-
-        Returns:
-            Number of rows inserted
-        """
         inserted = 0
 
         for _, row in df.iterrows():
@@ -79,28 +73,35 @@ class DivDfLoader:
 
 
     @staticmethod
-    async def upsert_df_symbol_only(db: AsyncSession, df: pd.DataFrame) -> int:
-        rows = []
-
-        for _, row in df.iterrows():
-            rows.append({
-                "company_name": row["companyName"],
-                "symbol": row["symbol"],
-                "dividend_ex_date": datetime.strptime(row["dividend_Ex_Date"], DATE_FMT).date(),
-                "record_date": datetime.strptime(row["record_Date"], DATE_FMT).date(),
-                "payment_date": datetime.strptime(row["payment_Date"], DATE_FMT).date(),
-                "dividend_rate": float(row["dividend_Rate"]),
-                "indicated_annual_dividend": float(row["indicated_Annual_Dividend"]),
-                "announcement_date": datetime.strptime(row["announcement_Date"], DATE_FMT).date(),
-            })
-
-        if not rows:
+    async def upsert_df_symbol_only(
+        db: AsyncSession,
+        df: pd.DataFrame,
+    ) -> int:
+        """
+        Bulk upsert dividends by symbol only.
+        Returns number of rows attempted.
+        """
+        if df is None or df.empty:
             return 0
 
-        stmt = insert(Div).values(rows) 
+        rows = [
+            {
+                "company_name": r["companyName"],
+                "symbol": r["symbol"],
+                "dividend_ex_date": datetime.strptime(r["dividend_Ex_Date"], DATE_FMT).date(),
+                "record_date": datetime.strptime(r["record_Date"], DATE_FMT).date(),
+                "payment_date": datetime.strptime(r["payment_Date"], DATE_FMT).date(),
+                "dividend_rate": float(r["dividend_Rate"]),
+                "indicated_annual_dividend": float(r["indicated_Annual_Dividend"]),
+                "announcement_date": datetime.strptime(r["announcement_Date"], DATE_FMT).date(),
+            }
+            for r in df.to_dict(orient="records")
+        ]
+
+        stmt = insert(Div).values(rows)
 
         stmt = stmt.on_conflict_do_update(
-            index_elements=["symbol"],
+            index_elements=["symbol"],  # symbol-only uniqueness
             set_={
                 "company_name": stmt.excluded.company_name,
                 "dividend_ex_date": stmt.excluded.dividend_ex_date,
@@ -109,10 +110,9 @@ class DivDfLoader:
                 "dividend_rate": stmt.excluded.dividend_rate,
                 "indicated_annual_dividend": stmt.excluded.indicated_annual_dividend,
                 "announcement_date": stmt.excluded.announcement_date,
-                "updated_at": datetime.utcnow(),
             },
         )
 
-        res = await db.execute(stmt)
+        await db.execute(stmt)
         await db.commit()
         return len(rows)

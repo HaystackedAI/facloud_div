@@ -13,7 +13,7 @@ class Div(Base, BaseMixin):
     __table_args__ = (Index("ix_dividends_symbol_exdate","symbol","dividend_ex_date",unique=True,),)
     
     company_name: Mapped[str] = mapped_column(String(255), nullable=True, index=True)
-    symbol:       Mapped[str] = mapped_column(String(50), nullable=True, index=True)
+    symbol:       Mapped[str] = mapped_column(String(50), nullable=True, index=True,unique=True)
 
     dividend_ex_date: Mapped[date] = mapped_column(Date,nullable=True,index=True,)
     record_date: Mapped[date] = mapped_column(Date,nullable=True,)
