@@ -3,7 +3,6 @@ from fastapi.responses import RedirectResponse
 
 from app.api.r_div_inject import injRou
 from app.api.r_div_show import divRou
-from app.api.r_reserve import reserveRou
 from app.api.r_div_rag import divRagRou
 
 rou = APIRouter()
@@ -20,4 +19,3 @@ rou.include_router(divRou, prefix="/div_show", tags=["Div Table"])
 
 
 
-rou.include_router(reserveRou, prefix="/reserve", tags=["Reserve"])

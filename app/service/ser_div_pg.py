@@ -1,11 +1,14 @@
 # app/service/ser_dividend_load.py
 import csv, pandas as pd
 from datetime import datetime, date
+from datetime import date, timedelta
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.dialects.postgresql import insert
 from sqlalchemy import delete
 
 from app.db.models.m_div import Div  # your ORM model
+from app.service.ser_div_pg_load2pg import DivDfLoader
+from app.service.ser_div_pg_grab_nasdaq import grab_dividends_to_df
 
 DATE_FMT = "%m/%d/%Y"  # Nasdaq CSV date format
 
@@ -20,48 +23,50 @@ class DivServicePg:
         return result.closed
 
 
-
     @staticmethod
-    async def upsert_today_and_future(
-        db: AsyncSession,
-        df: pd.DataFrame,
-    ) -> int:
-        if df is None or df.empty:
-            return 0
+    async def pruen_marketcap_anomalies(db: AsyncSession) -> int:
+        MIN_MARKETCAP = 1_000        # 1B
+        MAX_MARKETCAP = 5_000_000    # 5T
 
-        rows = [
-            {
-                "company_name": r["companyName"],
-                "symbol": r["symbol"],
-                "dividend_ex_date": datetime.strptime(r["dividend_Ex_Date"], DATE_FMT).date(),
-                "record_date": datetime.strptime(r["record_Date"], DATE_FMT).date(),
-                "payment_date": datetime.strptime(r["payment_Date"], DATE_FMT).date(),
-                "dividend_rate": float(r["dividend_Rate"]),
-                "indicated_annual_dividend": float(r["indicated_Annual_Dividend"]),
-                "announcement_date": datetime.strptime(r["announcement_Date"], DATE_FMT).date(),
-            }
-            for r in df.to_dict(orient="records")
-        ]
-
-        stmt = insert(Div).values(rows)
-
-        stmt = stmt.on_conflict_do_update(
-            index_elements=["symbol"],  # symbol-only uniqueness
-            set_={
-                "company_name": stmt.excluded.company_name,
-                "dividend_ex_date": stmt.excluded.dividend_ex_date,
-                "record_date": stmt.excluded.record_date,
-                "payment_date": stmt.excluded.payment_date,
-                "dividend_rate": stmt.excluded.dividend_rate,
-                "indicated_annual_dividend": stmt.excluded.indicated_annual_dividend,
-                "announcement_date": stmt.excluded.announcement_date,
-            },
+        stmt = delete(Div).where(
+            (Div.market_cap < MIN_MARKETCAP) |
+            (Div.market_cap > MAX_MARKETCAP) |
+            (Div.market_cap.is_(None))
         )
 
-        await db.execute(stmt)
+        result = await db.execute(stmt)
         await db.commit()
-        return len(rows)
-    
+        return result.closed
 
+    @staticmethod
+    async def grab_from_nasdaq_2pg_4wk(db: AsyncSession, today: date) -> int:
+        """
+        Grab dividends from today -> next 4 weeks and upsert into PostgreSQL.
 
-    
+        Returns:
+            Number of rows inserted/updated
+        """
+        total = 0
+        start = today
+        end = start + timedelta(weeks=1)
+
+        cur = start
+        print("start:", start, "end:", end)
+        while cur <= end:
+            try:
+                df = grab_dividends_to_df(target_date=cur.strftime("%Y-%m-%d"))
+                print(cur, "df.shape:", None if df is None else df.shape)
+
+                if df is None or df.empty:
+                    cur += timedelta(days=1)
+                    continue
+
+                total += await DivDfLoader.upsert_df_symbol_only(db, df)
+
+            except Exception as e:
+                # Ignore weekends/holidays / empty responses
+                pass
+
+            cur += timedelta(days=1)
+
+        return total

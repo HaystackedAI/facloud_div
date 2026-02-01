@@ -1,64 +1,22 @@
 # app/api/routes/wage.py
+from datetime import date
 from fastapi import APIRouter, Depends, HTTPException, Path, UploadFile, File, Query
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.db.db_async import get_db
 
 from app.service.ser_dividend_finnhub import refresh_all_finnhub_market_data, refresh_finnhub_market_data
-from app.service.ser_dividend_grab_nasdaq import grab_dividends_to_csv
-from app.service.ser_div_pg import DividendCsvLoader
-from app.service.ser_div_pipeline import DividendPipeline
+from app.service.ser_div_pg_grab_nasdaq import grab_dividends_to_csv
+from app.service.ser_div_pipeline import DivPipeline
 
 injRou = APIRouter()
 
 
-@injRou.post("/div_pipeline_4weeks")
-async def load_pipeline4weeks(
+@injRou.post("/div_dailyrun")
+async def run_daily_pipeline(
     db: AsyncSession = Depends(get_db),
 ):
-    count = await DividendPipeline.nasdaq_4w2pg(db)
-
-    return {
-        "status": "load to pg done",
-        "inserted": count,
-    }
-
-
-@injRou.post("/div_pipeline")
-async def load_pipeline(
-    date: str = Query(..., example="2026-02-02"),
-    db: AsyncSession = Depends(get_db),
-):
-    count = await DividendPipeline.nasdaq2pg(db, date)
-
-    return {
-        "status": "load to pg done",
-        "date": date,
-        "inserted": count,
-    }
-
-
-@injRou.post("/grab2csv")
-def grab_dividends(date: str = Query(..., example="2026-01-30")):
-    csv_path = grab_dividends_to_csv(target_date=date)
-    return {
-        "status": "grab done",
-        "csv": str(csv_path),
-    }
-
-
-@injRou.post("/load2pg")
-async def load_dividends(
-    filename: str = Query(..., example="dividends_2026-01-30.csv"),
-    db: AsyncSession = Depends(get_db),
-):
-    count = await DividendCsvLoader.load_csv(db, filename)
-
-    return {
-        "status": "load to pg done",
-        "file": filename,
-        "inserted": count,
-    }
+    return await DivPipeline.run_daily(db, date.today())
 
 
 @injRou.post("/grab-finnhub/{symbol}")
