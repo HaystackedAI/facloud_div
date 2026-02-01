@@ -1,8 +1,9 @@
 # app/service/ser_dividend_load.py
 import csv, pandas as pd
-from datetime import datetime
+from datetime import datetime, date
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.dialects.postgresql import insert
+from sqlalchemy import delete
 
 from app.db.models.m_div import Div  # your ORM model
 
@@ -44,8 +45,6 @@ class DividendCsvLoader:
         return inserted
 
 
-
-
 class DivDfLoader:
 
     @staticmethod
@@ -69,7 +68,6 @@ class DivDfLoader:
 
         await db.commit()
         return inserted
-
 
 
     @staticmethod
@@ -116,3 +114,14 @@ class DivDfLoader:
         await db.execute(stmt)
         await db.commit()
         return len(rows)
+    
+
+
+class DivClean:
+    
+    @staticmethod
+    async def delete_past(db: AsyncSession, today: date) -> int:
+        stmt = delete(Div).where(Div.dividend_ex_date < today)
+        result = await db.execute(stmt)
+        await db.commit()
+        return result.closed

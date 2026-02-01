@@ -6,7 +6,7 @@ from app.db.db_async import get_db
 
 from app.service.ser_dividend_finnhub import refresh_all_finnhub_market_data, refresh_finnhub_market_data
 from app.service.ser_dividend_grab_nasdaq import grab_dividends_to_csv
-from app.service.ser_div_load import DividendCsvLoader
+from app.service.ser_div_pg import DividendCsvLoader
 from app.service.ser_div_pipeline import DividendPipeline
 
 injRou = APIRouter()
