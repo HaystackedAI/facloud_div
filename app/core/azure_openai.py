@@ -5,6 +5,8 @@ from openai import AsyncOpenAI
 from app.config import get_settings_singleton
 
 settings = get_settings_singleton()
+api_key=os.getenv("AZURE_OPENAI_API_KEY"),
+print(api_key)
 
 client = AsyncOpenAI(
     api_key=os.getenv("AZURE_OPENAI_API_KEY"),

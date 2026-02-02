@@ -18,8 +18,8 @@ async def rebuild_dividend_chunks(
 
 
 @divRagRou.post("/embed-all")
-async def embed_all_wages(
+async def embed_all_div(
     db: AsyncSession = Depends(get_db),
 ):
-    count = EmbeddingService.embed_all_dummy(db)
+    count = await EmbeddingService.embed_all_dummy(db)
     return {"embedded": count}

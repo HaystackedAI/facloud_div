@@ -32,12 +32,16 @@ class DivEmbeddingRepository:
         await db.commit()
 
 
+
     @staticmethod
-    async def get_all_unembedded(db: AsyncSession):
+    async def get_all(db: AsyncSession):
         stmt = select(DivChunk)
         stmt = stmt.limit(500)  # process in batches of 100
         res = await db.execute(stmt)
         return res.scalars().all()
+
+
+
 
     @staticmethod
     async def update_embedding(
