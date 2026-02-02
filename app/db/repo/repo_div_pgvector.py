@@ -32,17 +32,6 @@ class DivEmbeddingRepository:
         await db.commit()
 
 
-
-    @staticmethod
-    async def get_all(db: AsyncSession):
-        stmt = select(DivChunk)
-        stmt = stmt.limit(500)  # process in batches of 100
-        res = await db.execute(stmt)
-        return res.scalars().all()
-
-
-
-
     @staticmethod
     async def update_embedding(
         db: AsyncSession,
@@ -52,3 +41,14 @@ class DivEmbeddingRepository:
         row = await db.get(DivChunk, row_id)
         row.embedding = embedding    # type: ignore
         db.add(row)
+
+
+    @staticmethod
+    async def fetch_div_pgvector(session, limit: int | None = None):
+        limit = 500 if limit is None else limit
+        
+        stmt = select(DivChunk)
+        if limit:
+            stmt = stmt.limit(limit)
+        res = await session.execute(stmt)
+        return res.scalars().all()

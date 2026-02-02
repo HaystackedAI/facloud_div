@@ -9,6 +9,7 @@ class _Settings(BaseSettings):
     # Always use get_settings_singleton() to access application configuration.
     #     Settings 是实现细节，不是公共 API
     # 公共 API 只有 get_settings_singleton()
+    AZURE_SEARCH_ENDPOINT: str = "https://aisearch8.search.windows.net"
     
     
     

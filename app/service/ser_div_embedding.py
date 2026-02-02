@@ -3,7 +3,7 @@ from sqlalchemy import select, delete
 
 from app.core.azure_openai import embed_fn_azure_new_v1
 from app.db.models.m_div import Div, DivChunk
-from app.db.repo.repo_div_embedding import DivEmbeddingRepository
+from app.db.repo.repo_div_pgvector import DivEmbeddingRepository
 
 
 class EmbeddingService:
@@ -12,7 +12,7 @@ class EmbeddingService:
     async def embed_all_dummy(
         db: AsyncSession,
     ) -> int:
-        rows = await DivEmbeddingRepository.get_all(db)
+        rows = await DivEmbeddingRepository.fetch_div_pgvector(db)
 
         for r in rows:
             text = r.content  # or combine EN + FR if you want
