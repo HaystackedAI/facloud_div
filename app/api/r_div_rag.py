@@ -42,6 +42,6 @@ async def search(q: str, top_k: int = 10):
     return await search_dividends(q, top_k)
 
 
-@divRagRou.post("/admin/reindex", dependencies=[AdminDeps])
+@divRagRou.post("/admin/reindex",) # dependencies=[AdminDeps])
 async def reindex(db: AsyncSession = Depends(get_db),):
     await bulk_index_dividends(db)
