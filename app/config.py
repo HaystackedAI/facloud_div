@@ -9,6 +9,9 @@ class _Settings(BaseSettings):
     # Always use get_settings_singleton() to access application configuration.
     #     Settings 是实现细节，不是公共 API
     # 公共 API 只有 get_settings_singleton()
+    
+    
+    
     OPENAI_API_KEY: Optional[str] = None
     SERPERDEV_API_KEY: Optional[str] = None
     TAVILY_API_KEY: str = "ff"
