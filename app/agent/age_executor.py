@@ -1,6 +1,6 @@
 import json
 from app.agent.age_brain import decide_next_action
-from app.agent.age_tools import get_dividend_data_tool
+from app.agent.age_tools import get_dividend_data_tool, search_web_tool
 from app.core.ai_logging import log_event
 
 # 1. Structural Validator (Defined locally or imported)
@@ -42,9 +42,13 @@ async def run_agent_executor(question: str, trace_id: str):
         # ACT
         if decision.get("tool") == "get_dividend_data":
             tool_result = await get_dividend_data_tool(decision["tool_input"])
-            messages.append({"role": "assistant", "content": json.dumps(decision)})
-            messages.append({"role": "system", "content": f"Observation: {json.dumps(tool_result)}"})
-            log_event("tool_observation", trace_id=trace_id, turn=turn, success="error" not in tool_result)
+        elif decision.get("tool") == "search_web": # <-- NEW TOOL ADDED HERE
+            tool_result = await search_web_tool(decision["tool_input"])
+            
+        messages.append({"role": "assistant", "content": json.dumps(decision)})
+        messages.append({"role": "system", "content": f"Observation: {json.dumps(tool_result)}"})
+        log_event("tool_observation", trace_id=trace_id, turn=turn, success="error" not in tool_result)
+        
 
     # USE QUALITY VALIDATOR HERE (Before returning to user)
     return validate_agent_response(final_output, trace_id)

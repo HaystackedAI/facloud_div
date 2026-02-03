@@ -20,7 +20,7 @@ client = AsyncOpenAI(
 )
 
 
-async def chat_completion(system_prompt: str, user_prompt: str) -> str:
+async def chat_completion_agent(system_prompt: str, user_prompt: str) -> str:
     resp = await client.chat.completions.create(
         model=deployment,
         messages=[
@@ -29,6 +29,21 @@ async def chat_completion(system_prompt: str, user_prompt: str) -> str:
         ],
     )
     return resp.choices[0].message.content
+
+
+
+async def chat_completion_agent(messages: list) -> str:
+    """
+    Stateful reasoning unit for Agents. 
+    Passes the full message history to maintain context/memory.
+    """
+    resp = await client.chat.completions.create(
+        model=deployment,
+        messages=messages,
+        response_format={"type": "json_object"} # Forces JSON for easy parsing
+    )
+    return resp.choices[0].message.content
+
 
 # async def chat_completion(system_prompt: str, user_prompt: str) -> str:
 #     resp = await client.chat.completions.create(

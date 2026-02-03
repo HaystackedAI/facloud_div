@@ -3,7 +3,7 @@ import time  # Changed from 'from time import time' to 'import time'
 import uuid
 from app.agent.ag1.agent_loop import run_agent_loop
 from app.core.ai_logging import log_event
-from app.core.azure_openai_chat import chat_completion
+from app.core.azure_openai_chat import chat_completion_agent
 from app.service.ser_ai_rag import rag_query
 
 async def run_agent_executor(question: str):
@@ -34,7 +34,7 @@ async def run_agent_executor(question: str):
         Provide a concise final answer to the user.
         """
         
-        final_answer = await chat_completion(
+        final_answer = await chat_completion_agent(
             system_prompt="You are a helpful financial assistant.",
             user_prompt=final_prompt
         )

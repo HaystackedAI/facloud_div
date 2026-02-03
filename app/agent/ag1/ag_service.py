@@ -4,7 +4,7 @@ from app.core.ai_logging import log_event
 from app.service.ser_ai_agent import decide_action
 from app.service.ser_div_az_search import search_dividends
 from app.core.rag_prompt import SYSTEM_PROMPT, build_user_prompt
-from app.core.azure_openai_chat import chat_completion
+from app.core.azure_openai_chat import chat_completion_agent
 
 
 def map_decision_to_action(decision) -> AgentAction:
@@ -73,7 +73,7 @@ async def ag_action(question: str, top_k: int):
     user_prompt = build_user_prompt(question, contexts)
     # answer = await chat_completion(SYSTEM_PROMPT, user_prompt)
     llm_start = time.perf_counter()
-    answer = await chat_completion(SYSTEM_PROMPT, user_prompt)
+    answer = await chat_completion_agent(SYSTEM_PROMPT, user_prompt)
     llm_ms = int((time.perf_counter() - llm_start) * 1000)
 
     log_event(
