@@ -2,8 +2,11 @@ import os
 from fastapi.middleware.cors import CORSMiddleware
 from contextlib import asynccontextmanager
 from fastapi import FastAPI
+import app
 from app.config import get_settings_singleton
 # from app.core.logging import setup_logger
+
+from app.core.rag_middleware import request_context_middleware
 from app.db.db_async import async_engine
 from app.api import rou
 
@@ -43,6 +46,8 @@ def create_app() -> FastAPI:
         allow_methods=["*"],
         allow_headers=["*"],
     )
+    
+    app.middleware("http")(request_context_middleware)
 
     app.include_router(rou)
 

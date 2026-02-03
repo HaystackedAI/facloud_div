@@ -13,7 +13,6 @@ Examples:
 
 This is **exactly** what interviewers mean by *agentic framework* .
 
-
 ## 2.1 Agent decision contract
 
 ### Input
@@ -27,3 +26,40 @@ User question
   </span><span><span class="hljs-attr">"reason"</span></span><span><span class="hljs-punctuation">:</span></span><span> </span><span><span class="hljs-string">"short explanation"</span></span><span>
 </span><span><span class="hljs-punctuation">}</span></span><span>
 </span></span></code></div></div></pre>
+
+# STEP 3 — Observability & tracing (enterprise-grade)
+
+**Goal**
+
+You must be able to answer, in prod:
+
+> “Why did this answer happen, how long did it take, and where did it fail?”
+
+We’ll add:
+
+* request correlation
+* step-level timing
+* agent + RAG visibility
+* zero behavior change
+
+No refactors. No guessing.
+
+## 3.1 What we will instrument (explicit)
+
+For **every request** :
+
+* request_id
+* agent decision
+* search latency
+* LLM latency
+* total latency
+* error (if any)
+
+We’ll log **JSON** , not strings.
+
+
+
+{
+"question": "Should I buy TD Bank stock next week?",
+"top_k": 5
+}

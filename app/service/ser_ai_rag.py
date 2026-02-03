@@ -1,3 +1,5 @@
+import time
+from app.core.rag_logging import log_event
 from app.service.ser_div_az_search import search_dividends
 from app.core.rag_prompt import SYSTEM_PROMPT, build_user_prompt
 from app.core.azure_openai_chat import chat_completion
@@ -43,7 +45,17 @@ async def rag_query(question: str, top_k: int):
         }
 
     # otherwise: search
+    # chunks = await search_dividends(question, top_k)
+    search_start = time.perf_counter()
     chunks = await search_dividends(question, top_k)
+    search_ms = int((time.perf_counter() - search_start) * 1000)
+
+    log_event(
+        "search_completed",
+        retrieved_chunks=len(chunks),
+        latency_ms=search_ms,
+    )
+
 
     if not chunks:
         return {
@@ -57,7 +69,17 @@ async def rag_query(question: str, top_k: int):
 
     contexts = [c["content"] for c in chunks]
     user_prompt = build_user_prompt(question, contexts)
+    # answer = await chat_completion(SYSTEM_PROMPT, user_prompt)
+    llm_start = time.perf_counter()
     answer = await chat_completion(SYSTEM_PROMPT, user_prompt)
+    llm_ms = int((time.perf_counter() - llm_start) * 1000)
+
+    log_event(
+        "llm_completed",
+        model="gpt-5-nano",
+        latency_ms=llm_ms,
+    )
+
 
     return {
         "answer": answer,
