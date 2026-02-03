@@ -1,7 +1,7 @@
 import json
 import time
 from app.core.ai_logging import log_event
-from app.agent.agent_prompt import AGENT_SYSTEM_PROMPT, build_agent_prompt
+from app.agent.ag1.agent_prompt import AGENT_SYSTEM_PROMPT, build_agent_prompt
 from app.core.azure_openai_chat import chat_completion
 
 # async def decide_action(question: str) -> dict:

@@ -1,7 +1,7 @@
 import json
 import time  # Changed from 'from time import time' to 'import time'
 import uuid
-from app.agent.agent_loop import run_agent_loop
+from app.agent.ag1.agent_loop import run_agent_loop
 from app.core.ai_logging import log_event
 from app.core.azure_openai_chat import chat_completion
 from app.service.ser_ai_rag import rag_query
