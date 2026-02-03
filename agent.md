@@ -57,9 +57,11 @@ For **every request** :
 
 We’ll log **JSON** , not strings.
 
-
-
 {
 "question": "Should I buy TD Bank stock next week?",
 "top_k": 5
 }
+
+
+
+STEP 4.1 — Agent Decision (REAL agent begins here)
