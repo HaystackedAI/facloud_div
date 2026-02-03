@@ -35,7 +35,7 @@ class _Settings(BaseSettings):
     SEED_SAMPLE_SIZE: int = 10  # Number of sample records to create
 
     # Application
-    PROJECT_NAME: str = "AIDividend"
+    PROJECT_NAME: str = "Dividend - FA Cloud"
     VERSION: str = "1.0.0"
     DESCRIPTION: str = "Dividend investing, systematically enhanced."
     ALLOWED_ORIGINS: List[str] = ["http://localhost:3000", "http://127.0.0.1:3000"]

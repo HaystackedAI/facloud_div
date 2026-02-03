@@ -110,3 +110,5 @@ I would leverage a framework like LangChain or an internal orchestration library
 
 
 A data lake is a cloud-scale, immutable tape archive with modern indexing and access control.
+
+We store original invoice documents immutably in a data lake so extraction logic can evolve without losing historical accuracy
