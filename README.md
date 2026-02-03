@@ -112,3 +112,49 @@ I would leverage a framework like LangChain or an internal orchestration library
 A data lake is a cloud-scale, immutable tape archive with modern indexing and access control.
 
 We store original invoice documents immutably in a data lake so extraction logic can evolve without losing historical accuracy
+
+
+
+5-nano
+import os
+from openai import AzureOpenAI
+
+client = AzureOpenAI(
+    api_version="2024-12-01-preview",
+    azure_endpoint="https://haystacked.cognitiveservices.azure.com/",
+    api_key=subscription_key
+)
+
+
+import os
+from openai import AzureOpenAI
+
+endpoint = "https://haystacked.cognitiveservices.azure.com/"
+model_name = "gpt-5-nano"
+deployment = "gpt-5-nano"
+
+subscription_key = "<your-api-key>"
+api_version = "2024-12-01-preview"
+
+client = AzureOpenAI(
+    api_version=api_version,
+    azure_endpoint=endpoint,
+    api_key=subscription_key,
+)
+
+response = client.chat.completions.create(
+    messages=[
+        {
+            "role": "system",
+            "content": "You are a helpful assistant.",
+        },
+        {
+            "role": "user",
+            "content": "I am going to Paris, what should I see?",
+        }
+    ],
+    max_completion_tokens=16384,
+    model=deployment
+)
+
+print(response.choices[0].message.content)
