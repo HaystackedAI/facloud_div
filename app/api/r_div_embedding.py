@@ -20,10 +20,10 @@ def require_password(credentials: HTTPBasicCredentials = Depends(security),):
 
 AdminDeps = Depends(require_password)
 
-divRagRou = APIRouter()
+divEmbedding = APIRouter()
 
 
-@divRagRou.post("/rebuild-chunks", summary="Rebuild dividend_chunks from dividends",)
+@divEmbedding.post("/rebuild-chunks", summary="Rebuild dividend_chunks from dividends",)
 async def rebuild_dividend_chunks(
     db: AsyncSession = Depends(get_db),
 ):
@@ -31,17 +31,13 @@ async def rebuild_dividend_chunks(
     return await service.rebuild_chunks()
 
 
-@divRagRou.post("/embed-all")
+@divEmbedding.post("/embed-all")
 async def embed_all_div(db: AsyncSession = Depends(get_db),):
     count = await EmbeddingService.embed_all_dummy(db)
     return {"embedded": count}
 
 
-@divRagRou.get("/az-search", dependencies=[AdminDeps])
-async def search(q: str, top_k: int = 10):
-    return await search_dividends(q, top_k)
 
-
-@divRagRou.post("/admin/reindex", dependencies=[AdminDeps])
+@divEmbedding.post("/admin/reindex", dependencies=[AdminDeps])
 async def reindex(db: AsyncSession = Depends(get_db),):
     await bulk_index_dividends(db)

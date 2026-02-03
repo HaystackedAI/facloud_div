@@ -18,30 +18,14 @@ def require_password(credentials: HTTPBasicCredentials = Depends(security),):
 AdminDeps = Depends(require_password)
 
 
-divRou = APIRouter()
+divDataLake = APIRouter()
 
 
-@divRou.get("/", dependencies=[AdminDeps])
-async def list_divs(db: AsyncSession = Depends(get_db),):
-    return await DivService.list_divs(db)
 
-
-@divRou.get("/emb")
-async def list_divs_emb(db: AsyncSession = Depends(get_db), dependencies=[AdminDeps]):
-    return await DivService.list_divs_emb(db)
-
-
-@divRou.get("/list_lake")
-def list_files_endpoint():
-    files = list_files()
-    return {"files": files}
-
-
-@divRou.get("/az-search", dependencies=[AdminDeps])
-async def search(q: str, top_k: int = 10):
-    return await search_dividends(q, top_k)
-
-   
+@divDataLake.post("/write_to_lake")
+def write_to_lake(payload: dict):
+    file_path = write_json(payload)
+    return {"status": "success", "file": file_path}
 
 
     
