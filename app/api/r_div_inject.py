@@ -9,6 +9,7 @@ from app.db.db_async import get_db
 from app.service.ser_dividend_finnhub import refresh_all_finnhub_market_data, refresh_finnhub_market_data
 from app.service.ser_div_pg_grab_nasdaq import grab_dividends_to_csv
 from app.service.ser_div_pipeline import DivPipeline
+from app.service.ser_az_data_lake import list_files, write_json
 
 injRou = APIRouter()
 
@@ -18,16 +19,6 @@ async def run_daily_pipeline(
     db: AsyncSession = Depends(get_db),
 ):
     return await DivPipeline.run_daily(db, date.today())
-
-
-# @injRou.post("/grab-finnhub/{symbol}")
-# def grab_finnhub(symbol: str):
-#     try:
-#         return refresh_finnhub_market_data(symbol)
-#     except LookupError as e:
-#         raise HTTPException(status_code=404, detail=str(e))
-#     except ValueError as e:
-#         raise HTTPException(status_code=502, detail=str(e))
 
 
 @injRou.post("/finnhub-update-price", summary="Update price once per hour. ")
@@ -47,4 +38,9 @@ def update_all_finnhub_bg(background_tasks: BackgroundTasks):
         "message": "Finnhub refresh job started in background"
     }
 
+
+@injRou.post("/write_to_lake")
+def write_to_lake(payload: dict):
+    file_path = write_json(payload)
+    return {"status": "success", "file": file_path}
 

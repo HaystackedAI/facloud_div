@@ -37,9 +37,6 @@ def list_files_endpoint():
     return {"files": files}
 
 
-@divRou.get("/az-search", dependencies=[AdminDeps])
-async def search(q: str, top_k: int = 10):
-    return await search_dividends(q, top_k)
 
    
 

@@ -20,24 +20,14 @@ def require_password(credentials: HTTPBasicCredentials = Depends(security),):
 
 AdminDeps = Depends(require_password)
 
-divEmbedding = APIRouter()
+congnitiveRou = APIRouter()
 
-
-@divEmbedding.post("/rebuild-chunks", summary="Rebuild dividend_chunks from dividends",)
-async def rebuild_dividend_chunks(
-    db: AsyncSession = Depends(get_db),
-):
-    service = DividendChunkService(db)
-    return await service.rebuild_chunks()
-
-
-@divEmbedding.post("/embed-all")
-async def embed_all_div(db: AsyncSession = Depends(get_db),):
-    count = await EmbeddingService.embed_all_dummy(db)
-    return {"embedded": count}
+@congnitiveRou.get("/cognitive-search", dependencies=[AdminDeps])
+async def search(q: str, top_k: int = 10):
+    return await search_dividends(q, top_k)
 
 
 
-# @divEmbedding.post("/admin/reindex", dependencies=[AdminDeps])
-# async def reindex(db: AsyncSession = Depends(get_db),):
-#     await bulk_index_dividends(db)
+@congnitiveRou.post("/az-cognitive-search-index", dependencies=[AdminDeps])
+async def reindex(db: AsyncSession = Depends(get_db),):
+    await bulk_index_dividends(db)
