@@ -6,6 +6,7 @@ dependencies = [
     "aiohttp>=3.13.3",
     "asyncpg>=0.31.0",
     "azure-search-documents[aio]>=11.6.0",
+    "azure-storage-file-datalake>=12.23.0",
     "fastapi[standard]>=0.128.0",
     "openai>=2.16.0",
     "pandas>=3.0.0",

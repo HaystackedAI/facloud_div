@@ -6,7 +6,7 @@ from fastapi.security import HTTPBasic, HTTPBasicCredentials
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.db.db_async import get_db
 from app.service.ser_div_show import DivService
-
+from app.service.ser_az_data_lake import list_files, write_json
 security = HTTPBasic()
 
 def require_password(credentials: HTTPBasicCredentials = Depends(security),):
@@ -29,6 +29,16 @@ async def list_divs(db: AsyncSession = Depends(get_db),):
 async def list_divs_emb(db: AsyncSession = Depends(get_db), dependencies=[AdminDeps]):
     return await DivService.list_divs_emb(db)
 
+@divRou.post("/write_to_lake")
+def write_to_lake(payload: dict):
+    file_path = write_json(payload)
+    return {"status": "success", "file": file_path}
+
+
+@divRou.get("/list_lake")
+def list_files_endpoint():
+    files = list_files()
+    return {"files": files}
     
 # @divRou.get("/pagination")
 # async def list_reports(
