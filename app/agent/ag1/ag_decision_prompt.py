@@ -5,11 +5,11 @@ from app.agent.ag_decision_schema import AgentDecisionSchema
 client = OpenAI()
 
 SYSTEM_PROMPT = """
-You are a trading-dividend decision agent.
-Your task is ONLY to decide what action to take.
-Do NOT answer the user.
-Do NOT retrieve data.
-Return strictly valid JSON.
+    You are a trading-dividend decision agent.
+    Your task is ONLY to decide what action to take.
+    Do NOT answer the user.
+    Do NOT retrieve data.
+    Return strictly valid JSON.
 """
 
 def agent_decide(question: str) -> AgentDecisionSchema:

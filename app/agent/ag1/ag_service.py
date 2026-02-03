@@ -1,6 +1,6 @@
 import time
 from app.agent.ag_control import AgentAction
-from app.core.rag_logging import log_event
+from app.core.ai_logging import log_event
 from app.service.ser_ai_agent import decide_action
 from app.service.ser_div_az_search import search_dividends
 from app.core.rag_prompt import SYSTEM_PROMPT, build_user_prompt

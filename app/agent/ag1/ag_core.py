@@ -3,7 +3,7 @@ from typing import Dict, Any, List
 from datetime import date, timedelta
 
 # from app.agent.ag_service import run_rag  # your existing RAG
-from app.core.rag_logging import logger  # your existing logger
+from app.core.ai_logging import logger  # your existing logger
 
 CONFIDENCE_THRESHOLD = 0.6
 

@@ -1,7 +1,7 @@
 import time
 import uuid
 from fastapi import Request
-from app.core.rag_logging import log_event
+from app.core.ai_logging import log_event
 
 async def request_context_middleware(request: Request, call_next):
     request_id = str(uuid.uuid4())
