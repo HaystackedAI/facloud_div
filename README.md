@@ -109,3 +109,4 @@ In enterprise settings, I would build RAG using Azure Cognitive Search as the ve
 I would leverage a framework like LangChain or an internal orchestration library to manage the retrieval-generation workflow, ensure guardrails, logging, and integrate it with CI/CD pipelines for production deployment.
 
 
+A data lake is a cloud-scale, immutable tape archive with modern indexing and access control.
