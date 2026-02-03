@@ -1,6 +1,15 @@
 # app/agent/schema.py
 from pydantic import BaseModel, Field
 from typing import List, Literal
+from typing import Optional, Literal
+
+class AgentDecision(BaseModel):
+    thought: str = Field(description="The reasoning behind the next step")
+    tool: Optional[Literal["get_dividend_data"]] = Field(None, description="The tool to call")
+    tool_input: Optional[str] = Field(None, description="The search query for the tool")
+    answer: Optional[str] = Field(None, description="The final answer to the user")
+    
+    
 
 class AgentDecisionSchema(BaseModel):
     use_search: bool = Field(

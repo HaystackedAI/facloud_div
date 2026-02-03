@@ -1,6 +1,6 @@
 # app/agent/decision.py
 from openai import OpenAI
-from app.agent.ag_decision_schema import AgentDecisionSchema
+from app.agent.agent_schema import AgentDecisionSchema
 
 client = OpenAI()
 
