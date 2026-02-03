@@ -2,7 +2,7 @@
 from typing import Dict, Any, List
 from datetime import date, timedelta
 
-from app.agent.ag_service import run_rag  # your existing RAG
+# from app.agent.ag_service import run_rag  # your existing RAG
 from app.core.rag_logging import logger  # your existing logger
 
 CONFIDENCE_THRESHOLD = 0.6
@@ -25,7 +25,7 @@ async def run_agent(question: str) -> Dict[str, Any]:
     logger.info("agent.intent", extra={"intent": intent})
 
     # ---- Step 2: Call your existing RAG (unchanged) ----
-    rag_result = await run_rag(question)
+    rag_result = "await run_rag(question)"
     # EXPECTED rag_result:
     # {
     #   "answer": "...",
