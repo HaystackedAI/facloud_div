@@ -42,3 +42,23 @@ async def search_web_tool(query: str):
         return {"data": cleaned_context}
     except Exception as e:
         return {"error": f"Web search failed: {str(e)}"}
+    
+    
+    
+# A simple, precision-focused tool for your agent
+async def get_db_metrics(symbol: str) -> dict:
+    """Gets exact hourly data directly from the Postgres table."""
+    async with SessionLocal() as session:
+        # Use the unique index you already defined in your model
+        stmt = select(Div).where(Div.symbol == symbol.upper())
+        result = await session.execute(stmt)
+        record = result.scalar_one_or_none()
+        
+        if record:
+            return {
+                "yield": float(record.yield_percent),
+                "price": float(record.latest_price),
+                "ex_date": record.dividend_ex_date.isoformat(),
+                "status": "Latest hourly data"
+            }
+        return {"error": "Ticker not found in database."}

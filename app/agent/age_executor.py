@@ -1,6 +1,6 @@
 import json
 from app.agent.age_brain import decide_next_action
-from app.agent.age_tools import get_dividend_data_tool, search_web_tool
+from app.agent.age_tools import get_db_metrics, get_dividend_data_tool, search_web_tool
 from app.core.ai_logging import log_event
 
 # 1. Structural Validator (Defined locally or imported)
@@ -40,7 +40,9 @@ async def run_agent_executor(question: str, trace_id: str):
             break # Exit loop once we have an answer
 
         # ACT
-        if decision.get("tool") == "get_dividend_data":
+        if decision.get("tool") == "get_db_metrics":
+            tool_result = await get_db_metrics(decision["tool_input"])            
+        elif decision.get("tool") == "get_dividend_data":
             tool_result = await get_dividend_data_tool(decision["tool_input"])
         elif decision.get("tool") == "search_web": # <-- NEW TOOL ADDED HERE
             tool_result = await search_web_tool(decision["tool_input"])
