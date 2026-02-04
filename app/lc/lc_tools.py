@@ -1,20 +1,19 @@
 # app/agents/tools.py
 from langchain.tools import tool
-from datetime import datetime
-
-@tool
-def add_numbers(a: int, b: int) -> int:
-    """Add two integers and return the result."""
-    return a + b
+from langchain.agents.middleware import wrap_tool_call
+from langchain.messages import ToolMessage
 
 
-@tool
-def get_server_time() -> str:
-    """Return the current server time as ISO string."""
-    return datetime.utcnow().isoformat()
+@wrap_tool_call
+def handle_tool_errors(request, handler):
+    try:
+        return handler(request)
+    except Exception as e:
+        return ToolMessage(
+            content=f"Tool error: Please check your input and try again. ({str(e)})",
+            tool_call_id=request.tool_call["id"],
+        )
 
-
-from langchain.tools import tool
 
 @tool
 def search_database(query: str, limit: int = 10) -> str:
@@ -25,3 +24,18 @@ def search_database(query: str, limit: int = 10) -> str:
         limit: Maximum number of results to return
     """
     return f"Found {limit} results for '{query}'"
+
+
+@tool
+def search(query: str) -> str:
+    """Search for information."""
+    return f"Results for: {query}"
+
+
+@tool
+def get_weather(location: str) -> str:
+    """Get weather information for a location."""
+    return f"Weather in {location}: Sunny, 72°F"
+
+
+TOOLS = [search, get_weather]

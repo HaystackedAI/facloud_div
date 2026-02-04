@@ -53,3 +53,13 @@ async def agent_endpoint(payload: AgentRequest):
     """
     output = lc_run_agent(payload.message)
     return {"result": output}
+
+
+
+@lcRou.post("/agent_final", response_model=AgentResponse)
+async def agent_endpoint(payload: AgentRequest):
+    """
+    Thin HTTP wrapper over LangChain agent.
+    """
+    output = lc_run_agent(payload.message)
+    return {"result": output}
