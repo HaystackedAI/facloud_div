@@ -14,7 +14,7 @@ Say:
 
 > “I build a small evaluation set of real user questions and check whether the correct chunks are retrieved in top-K.”
 
-This shows you understand RAG failures happen at retrieval.
+RAG failures happen at retrieval.
 
 text-embedding-3-large
 

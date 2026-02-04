@@ -1,4 +1,4 @@
-***Polished Interview Answer – Data Ingestion & Indexing***
+***Data Ingestion & Indexing***
 
 For data ingestion, we use a time-triggered Azure Function App that runs daily at 4:00 AM to ensure fresh dividend data for the upcoming four-week window.
 
