@@ -1,19 +1,21 @@
-from langchain.tools import Tool
-from app.agent.age_tools import get_dividend_data_tool, search_web_tool  # your existing functions
-
-# Wrap your existing functions as LangChain Tools
-get_dividend_tool = Tool(
-    name="get_dividend_data",
-    func=get_dividend_data_tool,
-    description="Fetch dividend data for a given ticker."
+# app/langchain/tools.py
+from langchain.tools import tool
+import anyio
+from app.agent.age_tools import (
+    get_dividend_data_tool,
+    search_web_tool,
 )
 
-search_web_tool = Tool(
-    name="search_web",
-    func=search_web_tool,
-    description="Search the web for relevant financial info."
-)
+@tool
+def get_dividend_data(query: str) -> dict:
+    """Internal dividend database: yield, payout ratio, history."""
+    return anyio.from_thread.run(get_dividend_data_tool, query)
 
 
-def echo_tool(input_text: str) -> str:
-    return f"Echo: {input_text}"
+@tool
+def search_web(query: str) -> dict:
+    """Live web search for recent news and sentiment."""
+    return anyio.from_thread.run(search_web_tool, query)
+
+
+TOOLS = [get_dividend_data, search_web]

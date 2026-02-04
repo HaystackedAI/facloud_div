@@ -1,22 +1,34 @@
-# app/api/lc_routes.py
+# main.py
+import os
 from fastapi import APIRouter
+from pydantic import BaseModel
 
-# from app.lc.lc_agent import run_lc_agent
-from app.schemas.sch_lc import QueryRequest, QueryResponse
-from app.core.lc_az_openai import run_chain
+from langchain_openai import ChatOpenAI
+from langchain_core.messages import HumanMessage, SystemMessage
 
 lcRou = APIRouter()
 
+# ---- LLM (Azure OpenAI via LangChain) ----
+llm = ChatOpenAI(
+    model="gpt-5-nano",  # Azure DEPLOYMENT NAME
+    base_url="https://haystacked.cognitiveservices.azure.com/openai/v1/",
+    api_key=os.environ["AZURE_OPENAI_API_KEY"],
+)
 
-@lcRou.post("/lc_query1", response_model=QueryResponse)
-async def lc_query(req: QueryRequest):
-    answer = await run_chain(req.question)
-    return QueryResponse(answer=answer)
+# ---- Request schema ----
+class ChatRequest(BaseModel):
+    message: str
 
+# ---- Agent endpoint ----
+@lcRou.post("/agent/chat")
+async def chat_agent(req: ChatRequest):
+    messages = [
+        SystemMessage(content="You are a helpful AI agent."),
+        HumanMessage(content=req.message),
+    ]
 
+    response = llm.invoke(messages)
 
-
-@lcRou.post("/langchain/lc_query", response_model=QueryResponse)
-async def lc1_query(question: str):
-    answer = await run_chain(question)
-    return {"answer": answer}
+    return {
+        "reply": response.content
+    }

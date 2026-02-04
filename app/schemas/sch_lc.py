@@ -5,3 +5,10 @@ class QueryRequest(BaseModel):
 
 class QueryResponse(BaseModel):
     answer: str
+
+
+class AgentResponse(BaseModel):
+    thought: str | None
+    tool: str | None
+    tool_input: str | None
+    answer: str | None
