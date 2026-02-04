@@ -1,27 +1,22 @@
 # app/api/lc_routes.py
 from fastapi import APIRouter
 
-from app.schemas.sch_lc import AgentRequest
-
-from app.lc_components.lc_container import LCContainer
+# from app.lc.lc_agent import run_lc_agent
+from app.schemas.sch_lc import QueryRequest, QueryResponse
+from app.core.lc_az_openai import run_chain
 
 lcRou = APIRouter()
-container = LCContainer()
-
-@lcRou.post("/agent_basic", summary="Wage Agent 1.1")
-async def agent_basic(payload: AgentRequest):
-    prompt = payload.prompt
-    return await container.basic_agent.invoke(prompt)
 
 
-@lcRou.post("/agent_math", summary="Wage Agent 1.1")
-async def agent_math(payload: AgentRequest):
-    prompt = payload.prompt
-    return await container.math_agent.invoke(prompt)
+@lcRou.post("/lc_query1", response_model=QueryResponse)
+async def lc_query(req: QueryRequest):
+    answer = await run_chain(req.question)
+    return QueryResponse(answer=answer)
 
 
 
-@lcRou.post("/agent_tavily", summary="Wage Agent 1.1")
-async def agent_tavily(payload: AgentRequest):
-    prompt = payload.prompt
-    return await container.tavily_agent.invoke(prompt)
+
+@lcRou.post("/langchain/lc_query", response_model=QueryResponse)
+async def lc1_query(question: str):
+    answer = await run_chain(question)
+    return {"answer": answer}

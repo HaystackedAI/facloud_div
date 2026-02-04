@@ -1,4 +1,7 @@
 from pydantic import BaseModel
 
-class AgentRequest(BaseModel):
-    prompt: str
+class QueryRequest(BaseModel):
+    question: str
+
+class QueryResponse(BaseModel):
+    answer: str

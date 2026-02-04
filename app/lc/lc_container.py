@@ -1,5 +1,5 @@
 # app/component/lc_container.py
-from .lc_agents import BasicAgent,MathToolAgent,AgentFactory, TavilyWebSearchAgent
+from .lc_agent import BasicAgent,MathToolAgent,AgentFactory, TavilyWebSearchAgent
 from .lc_model_provider import ModelProvider
 from .lc_tools import tool_math, tool_tavily
 

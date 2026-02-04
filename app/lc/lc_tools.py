@@ -1,23 +1,19 @@
-import os
+from langchain.tools import Tool
+from app.agent.age_tools import get_dividend_data_tool, search_web_tool  # your existing functions
 
-from langchain.tools import tool
-from typing import Dict, Any
-from tavily import TavilyClient
-from app.config import get_settings_singleton
+# Wrap your existing functions as LangChain Tools
+get_dividend_tool = Tool(
+    name="get_dividend_data",
+    func=get_dividend_data_tool,
+    description="Fetch dividend data for a given ticker."
+)
 
-# print(os.environ["TAVILY_API_KEY"])
-tavily_client = TavilyClient()
-
-
-# @tool("square_root")
-@tool("square_root", description="Calculate the square root of a number")
-def tool_math(x: float) -> float:
-    return x ** 0.5
-
+search_web_tool = Tool(
+    name="search_web",
+    func=search_web_tool,
+    description="Search the web for relevant financial info."
+)
 
 
-@tool("tavily", description="search online")
-def tool_tavily(query: str) -> Dict[str, Any]:
-    """Search the web for information"""
-    return tavily_client.search(query)
-
+def echo_tool(input_text: str) -> str:
+    return f"Echo: {input_text}"
