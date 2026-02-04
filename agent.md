@@ -65,3 +65,6 @@ We’ll log **JSON** , not strings.
 
 
 STEP 4.1 — Agent Decision (REAL agent begins here)
+
+
+We implement human-in-the-loop as a blocking agent action. The agent emits an ask_human action, the executor returns control to the user, and the user’s reply is injected as an observation in the next turn, preserving the ReAct loop
