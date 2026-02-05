@@ -2,7 +2,7 @@
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
 from typing import List, Dict
-from app.db.models.m_div import Div, DivChunk
+from app.db.models.m_div import Div, DivChunk768 as DivChunk
 
 
 class DivEmbeddingRepository:

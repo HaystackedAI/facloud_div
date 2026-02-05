@@ -1,7 +1,7 @@
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, delete
 
-from app.db.models.m_div import Div, DivChunk
+from app.db.models.m_div import Div, DivChunk768 as DivChunk
 from app.util.div2content import div_to_content
 
 

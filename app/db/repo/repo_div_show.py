@@ -4,7 +4,7 @@ from sqlalchemy import select
 from sqlalchemy.orm import Session
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.db.models.m_div import Div, DivChunk
+from app.db.models.m_div import Div, DivChunk768 as DivChunk
 
 
 class DivRepository:
