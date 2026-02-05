@@ -15,4 +15,6 @@ class Base(DeclarativeBase): pass
 class BaseMixin:
     id: Mapped[UUID] = mapped_column(Uuid,primary_key=True,default=uuid4, index=True)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now(), nullable=False)
-    note: Mapped[Optional[str]] = mapped_column(String(50),nullable=True,index=True,)
+    status: Mapped[str] = mapped_column(String, default="active", nullable=True)
+    description: Mapped[str] = mapped_column(String,nullable=False,default="description",
+)
