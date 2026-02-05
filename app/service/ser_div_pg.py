@@ -48,7 +48,8 @@ class DivServicePg:
         """
         total = 0
         start = today
-        end = start + timedelta(weeks=1)
+        weeks = 4
+        end = start + timedelta(weeks = weeks)
 
         cur = start
         print("start:", start, "end:", end)

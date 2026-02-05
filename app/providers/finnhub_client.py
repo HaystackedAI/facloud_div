@@ -22,6 +22,8 @@ class FinnhubClient:
             params={"symbol": symbol, "token": self.token},
             timeout=10,
         ).json()
+        
+        print(symbol, quote, profile)
 
         return {
             "symbol": symbol,

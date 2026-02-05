@@ -31,10 +31,10 @@ async def list_divs_emb(db: AsyncSession = Depends(get_db), dependencies=[AdminD
     return await DivService.list_divs_emb(db)
 
 
-@divRou.get("/list_lake")
-def list_files_endpoint():
-    files = list_files()
-    return {"files": files}
+# @divRou.get("/list_lake")
+# def list_files_endpoint():
+#     files = list_files()
+#     return {"files": files}
 
 
 

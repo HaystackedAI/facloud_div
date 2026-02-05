@@ -8,7 +8,7 @@ from app.db.db_async import get_db
 
 from app.service.ser_dividend_finnhub import refresh_all_finnhub_market_data, refresh_finnhub_market_data
 from app.service.ser_div_pg_grab_nasdaq import grab_dividends_to_csv
-from app.service.ser_div_pipeline import DivPipeline
+from app.pipelines.pip_div_inject import DivPipeline
 from app.service.ser_az_data_lake import list_files, write_json
 
 injRou = APIRouter()
