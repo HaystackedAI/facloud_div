@@ -1,6 +1,6 @@
 from azure.search.documents.models import VectorizedQuery
 from app.providers.az_search_client import get_search_client
-from app.core.azure_openai_embedding import embed_fn_azure_new_v1
+from app.llm.azure_openai_embedding import embed_fn_azure_new_v1
 
 async def search_dividends(query: str, top_k: int):
     query_vec = await embed_fn_azure_new_v1(query)

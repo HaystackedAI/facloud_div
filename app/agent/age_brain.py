@@ -1,6 +1,6 @@
 import json
 from app.agent.agent_schema import AgentDecision
-from app.core.azure_openai_chat import chat_completion_agent
+from app.llm.azure_openai_chat import chat_completion_agent
 
 
 async def decide_next_action(messages: list) -> AgentDecision:

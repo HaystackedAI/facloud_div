@@ -28,29 +28,62 @@ class Div(Base, BaseMixin):
     market_cap: Mapped[float] = mapped_column(Numeric(20, 2),nullable=True,)
 
 
-class DivChunk(Base, BaseMixin):
-    __tablename__ = "dividend_chunks"
 
-    div_id: Mapped[uuid.UUID] = mapped_column(nullable=True,)
 
-    chunk_index: Mapped[int] = mapped_column(
-        Integer,
-        nullable=True,
-    )
+class DivChunkBase(Base, BaseMixin):
+    __abstract__ = True
 
-    content: Mapped[str] = mapped_column(
-        String,
-        nullable=True,
-    )
+    div_id: Mapped[uuid.UUID] = mapped_column(nullable=True)
+    chunk_index: Mapped[int] = mapped_column(Integer, nullable=True)
+    content: Mapped[str] = mapped_column(String, nullable=True)
+
+
+
+
+class DivChunk1536(DivChunkBase):
+    __tablename__ = "dividend_chunks_1536"
 
     embedding: Mapped[Optional[List[float]]] = mapped_column(
         Vector(1536),
         nullable=True,
     )
-
     __table_args__ = (
         Index(
-            "ix_dividend_chunks_div_chunk",
+            "ix_dividend_chunks_1536_div_chunk",
+            "div_id",
+            "chunk_index",
+            unique=True,
+        ),
+    )
+
+
+class DivChunk768(DivChunkBase):
+    __tablename__ = "dividend_chunks_768"
+
+    embedding: Mapped[Optional[List[float]]] = mapped_column(
+        Vector(768),
+        nullable=True,
+    )
+    __table_args__ = (
+        Index(
+            "ix_dividend_chunks_768_div_chunk",
+            "div_id",
+            "chunk_index",
+            unique=True,
+        ),
+    )
+
+
+class DivChunk3072(DivChunkBase):
+    __tablename__ = "dividend_chunks_3072"
+
+    embedding: Mapped[Optional[List[float]]] = mapped_column(
+        Vector(3072),
+        nullable=True,
+    )
+    __table_args__ = (
+        Index(
+            "ix_dividend_chunks_3072_div_chunk",
             "div_id",
             "chunk_index",
             unique=True,

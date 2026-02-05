@@ -1,7 +1,7 @@
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, delete
 
-from app.core.azure_openai_embedding import embed_fn_azure_new_v1
+from app.llm.azure_openai_embedding import embed_fn_azure_new_v1
 from app.db.models.m_div import Div, DivChunk
 from app.db.repo.repo_div_pgvector import DivEmbeddingRepository
 
