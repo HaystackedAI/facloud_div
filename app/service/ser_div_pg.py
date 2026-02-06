@@ -71,3 +71,35 @@ class DivServicePg:
             cur += timedelta(days=1)
 
         return total
+
+    
+    @staticmethod
+    def map_df_to_div_records(df: pd.DataFrame):
+        records = []
+
+        for _, row in df.iterrows():
+            # Try to extract a symbol from the company string if available
+            # Example: "Coffee Holding (JVA)" -> symbol = "JVA"
+            symbol = None
+            if "(" in row['Company'] and ")" in row['Company']:
+                symbol = row['Company'].split("(")[-1].replace(")", "").strip()
+
+            # Prepare Div fields
+            div = {
+                "company_name": row['Company'],
+                "symbol": symbol,
+                "dividend_ex_date": pd.to_datetime(row['Ex-Dividend Date'], errors='coerce').date() if pd.notna(row['Ex-Dividend Date']) else None,
+                "payment_date": pd.to_datetime(row['Payment Date'], errors='coerce').date() if pd.notna(row['Payment Date']) else None,
+                "dividend_rate": float(row['Dividend']) if pd.notna(row['Dividend']) else None,
+                "yield_percent": float(str(row['Yield']).rstrip('%')) if pd.notna(row['Yield']) else None,
+                # The rest can be None for now
+                "record_date": None,
+                "indicated_annual_dividend": None,
+                "announcement_date": None,
+                "latest_price": None,
+                "market_cap": None
+            }
+
+            records.append(div)
+
+        return records

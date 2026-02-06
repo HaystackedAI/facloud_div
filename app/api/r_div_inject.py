@@ -11,6 +11,8 @@ from app.service.ser_div_pg_grab_nasdaq import grab_dividends_to_csv
 from app.pipelines.pip_div_inject import DivPipeline
 from app.service.ser_az_data_lake import list_files, write_json
 
+from app.service.ser_div_pg_load2pg import upsert_dividends
+
 injRou = APIRouter()
 
 
@@ -44,3 +46,23 @@ def write_to_lake(payload: dict):
     file_path = write_json(payload)
     return {"status": "success", "file": file_path}
 
+
+@injRou.post("/read_from_google_sheet")
+async def read_from_google_sheet(db: AsyncSession = Depends(get_db),
+                                 ):
+    import pandas as pd
+    url = "https://docs.google.com/spreadsheets/d/15QBf76ab4zSt-S-oGSrSpgdJngpdGCxFMJqZkC6_sAM/export?format=csv"
+    df = pd.read_csv(url).dropna(how='all').reset_index(drop=True)
+
+    # Upsert into database
+    total = await upsert_dividends(db, df)
+    return {"inserted_or_updated": total}
+
+    # url = "https://docs.google.com/spreadsheets/d/15QBf76ab4zSt-S-oGSrSpgdJngpdGCxFMJqZkC6_sAM/export?format=csv"
+    # df = pd.read_csv(url)
+    # df = df.dropna(how='all')
+    # df = df.reset_index(drop=True)
+    # # Convert NaN to None (JSON-safe)
+    # print(df.head)
+
+    # return {"status": "success",}
