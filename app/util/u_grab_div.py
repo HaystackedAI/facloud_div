@@ -2,8 +2,8 @@
 import requests
 import pandas as pd
 from pathlib import Path
-
-NASDAQ_URL = "https://api.nasdaq.com/api/calendar/dividends"
+from app.config import get_settings_singleton
+settings=get_settings_singleton()
 
 HEADERS = {
     "User-Agent": "Mozilla/5.0",
@@ -11,9 +11,6 @@ HEADERS = {
     "Origin": "https://www.nasdaq.com",
     "Referer": "https://www.nasdaq.com/",
 }
-
-# Hardcoded CSV folder
-CSV_FOLDER = Path("data/dividends")
 
 # Expected columns for validation
 EXPECTED_COLUMNS = {
@@ -29,12 +26,8 @@ EXPECTED_COLUMNS = {
 
 
 def grab_nasdaq_to_df(target_date: str) -> pd.DataFrame:
-    # Ensure folder exists
-    CSV_FOLDER.mkdir(parents=True, exist_ok=True)
-
-    # Fetch data from Nasdaq
     r = requests.get(
-        NASDAQ_URL,
+        settings.NASDAQ_URL,
         params={"date": target_date},
         headers=HEADERS,
         timeout=30,
@@ -48,12 +41,10 @@ def grab_nasdaq_to_df(target_date: str) -> pd.DataFrame:
     missing = EXPECTED_COLUMNS - set(df.columns)
     if missing:
         raise RuntimeError(f"Missing columns from Nasdaq payload: {missing}")
-
-
     return df
 
 
 
-def grab_googlesheet_to_df(url: str) -> pd.DataFrame:
-    df_google = pd.read_csv(url).dropna(how='all').reset_index(drop=True)
+def grab_googlesheet_to_df() -> pd.DataFrame:
+    df_google = pd.read_csv(settings.GOOGLE_SHEET_URL).dropna(how='all').reset_index(drop=True)
     return df_google

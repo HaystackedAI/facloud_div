@@ -10,7 +10,9 @@ class _Settings(BaseSettings):
     #     Settings 是实现细节，不是公共 API
     # 公共 API 只有 get_settings_singleton()
     AZURE_SEARCH_ENDPOINT: str = "https://aisearch8.search.windows.net"
-    
+    GOOGLE_SHEET_URL = "https://docs.google.com/spreadsheets/d/15QBf76ab4zSt-S-oGSrSpgdJngpdGCxFMJqZkC6_sAM/export?format=csv"
+    NASDAQ_URL = "https://api.nasdaq.com/api/calendar/dividends"
+
     
     
     OPENAI_API_KEY: Optional[str] = None
