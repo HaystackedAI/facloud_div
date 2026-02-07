@@ -8,7 +8,7 @@ from sqlalchemy import delete
 
 from app.db.models.m_div import Div  # your ORM model
 from app.service.ser_div_pg_load2pg import DivDfLoader
-from app.util.u_grab_div import grab_dividends_to_df
+from app.util.u_grab_div import grab_nasdaq_to_df, grab_googlesheet_to_df
 
 DATE_FMT = "%m/%d/%Y"  # Nasdaq CSV date format
 
@@ -38,8 +38,9 @@ class DivServicePg:
         await db.commit()
         return result.closed
 
+
     @staticmethod
-    async def grab_from_nasdaq_2pg_4wk(db: AsyncSession, today: date) -> int:
+    async def from_nasdaq_2pg_4wk(db: AsyncSession, today: date) -> int:
         """
         Grab dividends from today -> next 4 weeks and upsert into PostgreSQL.
 
@@ -55,7 +56,7 @@ class DivServicePg:
         print("start:", start, "end:", end)
         while cur <= end:
             try:
-                df = grab_dividends_to_df(target_date=cur.strftime("%Y-%m-%d"))
+                df = grab_nasdaq_to_df(target_date=cur.strftime("%Y-%m-%d"))
                 print(cur, "df.shape:", None if df is None else df.shape)
 
                 if df is None or df.empty:
@@ -74,8 +75,9 @@ class DivServicePg:
 
     
     @staticmethod
-    def map_df_to_div_records(df: pd.DataFrame):
-        records = []
+    def from_google_to_pg(url: str) -> list[dict]:
+        df = grab_googlesheet_to_df(url)
+        records: list[dict] = []
 
         for _, row in df.iterrows():
             # Try to extract a symbol from the company string if available
@@ -85,7 +87,7 @@ class DivServicePg:
                 symbol = row['Company'].split("(")[-1].replace(")", "").strip()
 
             # Prepare Div fields
-            div = {
+            records.append({
                 "company_name": row['Company'],
                 "symbol": symbol,
                 "dividend_ex_date": pd.to_datetime(row['Ex-Dividend Date'], errors='coerce').date() if pd.notna(row['Ex-Dividend Date']) else None,
@@ -98,8 +100,6 @@ class DivServicePg:
                 "announcement_date": None,
                 "latest_price": None,
                 "market_cap": None
-            }
-
-            records.append(div)
+            })
 
         return records

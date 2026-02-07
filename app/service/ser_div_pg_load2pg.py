@@ -6,7 +6,7 @@ from sqlalchemy.dialects.postgresql import insert
 from sqlalchemy import delete
 
 from app.db.models.m_div import Div  # your ORM model
-from app.service.ser_div_pg import map_df_to_div_records  # helper to convert df to dict records for upsert
+from app.service.service_div_inject import map_df_to_div_records  # helper to convert df to dict records for upsert
 
 DATE_FMT = "%m/%d/%Y"  # Nasdaq CSV date format
 

@@ -28,7 +28,7 @@ EXPECTED_COLUMNS = {
 }
 
 
-def grab_dividends_to_df(target_date: str) -> pd.DataFrame:
+def grab_nasdaq_to_df(target_date: str) -> pd.DataFrame:
     # Ensure folder exists
     CSV_FOLDER.mkdir(parents=True, exist_ok=True)
 
@@ -54,6 +54,6 @@ def grab_dividends_to_df(target_date: str) -> pd.DataFrame:
 
 
 
-def grab_google_sheet(url: str) -> pd.DataFrame:
+def grab_googlesheet_to_df(url: str) -> pd.DataFrame:
     df_google = pd.read_csv(url).dropna(how='all').reset_index(drop=True)
     return df_google

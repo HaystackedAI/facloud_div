@@ -4,8 +4,8 @@ from datetime import date, timedelta
 import pandas as pd
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.service.ser_div_pg import DivDfLoader
-from app.util.u_grab_div import grab_dividends_to_df
+from app.service.service_div_inject import DivDfLoader
+from app.util.u_grab_div import grab_nasdaq_to_df
 
 
 class DividendPipeline:
@@ -19,7 +19,7 @@ class DividendPipeline:
             Number of rows inserted
         """
         # Step 1: Grab dividends 
-        df = grab_dividends_to_df(target_date=target_date)
+        df = grab_nasdaq_to_df(target_date=target_date)
 
         # Step 2: Load DataFrame into PostgreSQL
         inserted_count = await DivDfLoader.load_df(db, df)
@@ -44,7 +44,7 @@ class DividendPipeline:
         print("start:", start, "end:", end)
         while cur <= end:
             try:
-                df = grab_dividends_to_df(target_date=cur.strftime("%Y-%m-%d"))
+                df = grab_nasdaq_to_df(target_date=cur.strftime("%Y-%m-%d"))
                 print(cur, "df.shape:", None if df is None else df.shape)
 
                 if df is None or df.empty:

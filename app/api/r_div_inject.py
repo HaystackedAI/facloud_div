@@ -7,11 +7,9 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.db.db_async import get_db
 
 from app.service.ser_dividend_finnhub import refresh_all_finnhub_market_data, refresh_finnhub_market_data
-from app.util.u_grab_div import grab_dividends_to_csv
 from app.pipelines.pip_div_inject import DivPipeline
 from app.service.ser_az_data_lake import list_files, write_json
 
-from app.service.ser_div_inject import 
 
 injRou = APIRouter()
 
@@ -21,6 +19,15 @@ async def run_daily_pipeline(
     db: AsyncSession = Depends(get_db),
 ):
     return await DivPipeline.run_daily(db, date.today())
+
+
+@injRou.post("/div_monthly_google_sheet")
+async def monthly_read_from_google_sheet(
+    db: AsyncSession = Depends(get_db),
+):
+    url = "https://docs.google.com/spreadsheets/d/15QBf76ab4zSt-S-oGSrSpgdJngpdGCxFMJqZkC6_sAM/export?format=csv"
+    # Upsert into database
+    return await DivPipeline.run_monthly(db, url)
 
 
 @injRou.post("/finnhub-update-price", summary="Update price once per hour. ")
@@ -47,11 +54,3 @@ def write_to_lake(payload: dict):
     return {"status": "success", "file": file_path}
 
 
-@injRou.post("/google_sheet")
-async def read_from_google_sheet(
-    db: AsyncSession = Depends(get_db),
-):
-    url = "https://docs.google.com/spreadsheets/d/15QBf76ab4zSt-S-oGSrSpgdJngpdGCxFMJqZkC6_sAM/export?format=csv"
-    # Upsert into database
-    total = await process_google_sheet(db, url)
-    return {"inserted_or_updated": total}
