@@ -28,35 +28,6 @@ EXPECTED_COLUMNS = {
 }
 
 
-def grab_dividends_to_csv(target_date: str) -> Path:
-    # Ensure folder exists
-    CSV_FOLDER.mkdir(parents=True, exist_ok=True)
-
-    # Fetch data from Nasdaq
-    r = requests.get(
-        NASDAQ_URL,
-        params={"date": target_date},
-        headers=HEADERS,
-        timeout=30,
-    )
-    r.raise_for_status()
-
-    rows = r.json()["data"]["calendar"]["rows"]
-    df = pd.DataFrame(rows)
-
-    # Validate CSV columns
-    missing = EXPECTED_COLUMNS - set(df.columns)
-    if missing:
-        raise RuntimeError(f"Missing columns from Nasdaq payload: {missing}")
-
-    # Save CSV
-    csv_path = CSV_FOLDER / f"dividends_{target_date}.csv"
-    df.to_csv(csv_path, index=False)
-
-    return csv_path
-
-
-
 def grab_dividends_to_df(target_date: str) -> pd.DataFrame:
     # Ensure folder exists
     CSV_FOLDER.mkdir(parents=True, exist_ok=True)
@@ -80,3 +51,9 @@ def grab_dividends_to_df(target_date: str) -> pd.DataFrame:
 
 
     return df
+
+
+
+def grab_google_sheet(url: str) -> pd.DataFrame:
+    df_google = pd.read_csv(url).dropna(how='all').reset_index(drop=True)
+    return df_google

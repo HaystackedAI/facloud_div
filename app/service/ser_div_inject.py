@@ -5,7 +5,7 @@ import pandas as pd
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.service.ser_div_pg import DivDfLoader
-from app.service.ser_div_pg_grab_nasdaq import grab_dividends_to_df
+from app.util.u_grab_div import grab_dividends_to_df
 
 
 class DividendPipeline:
@@ -60,3 +60,4 @@ class DividendPipeline:
             cur += timedelta(days=1)
 
         return total
+    

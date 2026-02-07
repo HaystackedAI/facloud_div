@@ -7,11 +7,11 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.db.db_async import get_db
 
 from app.service.ser_dividend_finnhub import refresh_all_finnhub_market_data, refresh_finnhub_market_data
-from app.service.ser_div_pg_grab_nasdaq import grab_dividends_to_csv
+from app.util.u_grab_div import grab_dividends_to_csv
 from app.pipelines.pip_div_inject import DivPipeline
 from app.service.ser_az_data_lake import list_files, write_json
 
-from app.service.ser_div_pg_load2pg import upsert_dividends
+from app.service.ser_div_inject import 
 
 injRou = APIRouter()
 
@@ -47,22 +47,11 @@ def write_to_lake(payload: dict):
     return {"status": "success", "file": file_path}
 
 
-@injRou.post("/read_from_google_sheet")
-async def read_from_google_sheet(db: AsyncSession = Depends(get_db),
-                                 ):
-    import pandas as pd
+@injRou.post("/google_sheet")
+async def read_from_google_sheet(
+    db: AsyncSession = Depends(get_db),
+):
     url = "https://docs.google.com/spreadsheets/d/15QBf76ab4zSt-S-oGSrSpgdJngpdGCxFMJqZkC6_sAM/export?format=csv"
-    df = pd.read_csv(url).dropna(how='all').reset_index(drop=True)
-
     # Upsert into database
-    total = await upsert_dividends(db, df)
+    total = await process_google_sheet(db, url)
     return {"inserted_or_updated": total}
-
-    # url = "https://docs.google.com/spreadsheets/d/15QBf76ab4zSt-S-oGSrSpgdJngpdGCxFMJqZkC6_sAM/export?format=csv"
-    # df = pd.read_csv(url)
-    # df = df.dropna(how='all')
-    # df = df.reset_index(drop=True)
-    # # Convert NaN to None (JSON-safe)
-    # print(df.head)
-
-    # return {"status": "success",}

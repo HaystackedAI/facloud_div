@@ -8,7 +8,7 @@ from sqlalchemy import delete
 
 from app.db.models.m_div import Div  # your ORM model
 from app.service.ser_div_pg_load2pg import DivDfLoader
-from app.service.ser_div_pg_grab_nasdaq import grab_dividends_to_df
+from app.util.u_grab_div import grab_dividends_to_df
 
 DATE_FMT = "%m/%d/%Y"  # Nasdaq CSV date format
 
