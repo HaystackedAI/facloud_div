@@ -5,7 +5,7 @@ import pandas as pd
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.service.service_div_inject import DivDfLoader
-from app.util.u_grab_div import grab_nasdaq_to_df
+from app.util.util_grab_div import grab_nasdaq_to_df
 
 
 class DividendPipeline:
