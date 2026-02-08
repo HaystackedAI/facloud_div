@@ -8,7 +8,7 @@ from app.db.db_async import get_db
 
 from app.service.ser_dividend_finnhub import refresh_all_finnhub_market_data, refresh_finnhub_market_data
 from app.pipelines.pip_div_inject import DivPipeline
-from app.service.ser_az_data_lake import list_files, write_json
+# from app.service.ser_az_data_lake import list_files, write_json
 
 
 injRou = APIRouter()
@@ -25,9 +25,8 @@ async def run_daily_pipeline(
 async def monthly_read_from_google_sheet(
     db: AsyncSession = Depends(get_db),
 ):
-    url = "https://docs.google.com/spreadsheets/d/15QBf76ab4zSt-S-oGSrSpgdJngpdGCxFMJqZkC6_sAM/export?format=csv"
     # Upsert into database
-    return await DivPipeline.run_monthly(db, url)
+    return await DivPipeline.run_monthly(db)
 
 
 @injRou.post("/finnhub-update-price", summary="Update price once per hour. ")
@@ -48,9 +47,5 @@ def update_all_finnhub_bg(background_tasks: BackgroundTasks):
     }
 
 
-@injRou.post("/write_to_lake")
-def write_to_lake(payload: dict):
-    file_path = write_json(payload)
-    return {"status": "success", "file": file_path}
 
 

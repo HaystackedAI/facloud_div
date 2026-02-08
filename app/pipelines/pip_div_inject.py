@@ -21,14 +21,11 @@ class DivPipeline:
 
 
     @staticmethod
-    async def run_monthly(db: AsyncSession, url: str) -> dict:
-        upserted = await DivServicePg.from_google_to_pg(db, url)
-        enriched = refresh_all_finnhub_market_data()
-        pruned = await DivServicePg.pruen_marketcap_anomalies(db)
+    async def run_monthly(db: AsyncSession) -> dict:
+        upserted = await DivServicePg.from_google_to_pg(db)
+        # enriched = refresh_all_finnhub_market_data()
+        # pruned = await DivServicePg.pruen_marketcap_anomalies(db)
 
         return {
-            "deleted_past": deleted,
             "upserted": upserted,
-            "enriched": enriched,
-            "Anomaly": pruned,
         }

@@ -6,7 +6,7 @@ from sqlalchemy.dialects.postgresql import insert
 from sqlalchemy import delete
 
 from app.db.models.m_div import Div  # your ORM model
-from app.service.service_div_inject import map_df_to_div_records  # helper to convert df to dict records for upsert
+# from app.service.service_div_inject import map_df_to_div_records  # helper to convert df to dict records for upsert
 
 DATE_FMT = "%m/%d/%Y"  # Nasdaq CSV date format
 
@@ -117,29 +117,29 @@ class DivDfLoader:
         return len(rows)
     
     
-    @staticmethod
-    async def upsert_dividends(db: AsyncSession, df: pd.DataFrame):
-        records = map_df_to_div_records(df)
-        total = 0
+    # @staticmethod
+    # async def upsert_dividends(db: AsyncSession, df: pd.DataFrame):
+    #     records = map_df_to_div_records(df)
+    #     total = 0
 
-        for record in records:
-            stmt = insert(Div).values(**record)
-            # ON CONFLICT on unique index: symbol + dividend_ex_date
-            stmt = stmt.on_conflict_do_update(
-                index_elements=['symbol', 'dividend_ex_date'],
-                set_={
-                    "company_name": record["company_name"],
-                    "dividend_rate": record["dividend_rate"],
-                    "payment_date": record["payment_date"],
-                    "yield_percent": record["yield_percent"],
-                    # update other columns as needed
-                }
-            )
-            await db.execute(stmt)
-            total += 1
+    #     for record in records:
+    #         stmt = insert(Div).values(**record)
+    #         # ON CONFLICT on unique index: symbol + dividend_ex_date
+    #         stmt = stmt.on_conflict_do_update(
+    #             index_elements=['symbol', 'dividend_ex_date'],
+    #             set_={
+    #                 "company_name": record["company_name"],
+    #                 "dividend_rate": record["dividend_rate"],
+    #                 "payment_date": record["payment_date"],
+    #                 "yield_percent": record["yield_percent"],
+    #                 # update other columns as needed
+    #             }
+    #         )
+    #         await db.execute(stmt)
+    #         total += 1
 
-        await db.commit()
-        return total
+    #     await db.commit()
+    #     return total
 
     
 

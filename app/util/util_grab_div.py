@@ -2,6 +2,7 @@
 import requests
 import pandas as pd
 from pathlib import Path
+
 from app.config import get_settings_singleton
 settings=get_settings_singleton()
 

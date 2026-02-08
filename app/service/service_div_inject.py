@@ -41,12 +41,6 @@ class DivServicePg:
 
     @staticmethod
     async def from_nasdaq_2pg_4wk(db: AsyncSession, today: date) -> int:
-        """
-        Grab dividends from today -> next 4 weeks and upsert into PostgreSQL.
-
-        Returns:
-            Number of rows inserted/updated
-        """
         total = 0
         start = today
         weeks = 4
@@ -75,31 +69,44 @@ class DivServicePg:
 
     
     @staticmethod
-    def from_google_to_pg(url: str) -> list[dict]:
-        df = grab_googlesheet_to_df(url)
-        records: list[dict] = []
+    def _from_google_to_df(df: pd.DataFrame) -> pd.DataFrame:
+        df = df.copy()
 
-        for _, row in df.iterrows():
-            # Try to extract a symbol from the company string if available
-            # Example: "Coffee Holding (JVA)" -> symbol = "JVA"
-            symbol = None
-            if "(" in row['Company'] and ")" in row['Company']:
-                symbol = row['Company'].split("(")[-1].replace(")", "").strip()
+        # extract symbol from "Company (XXX)"
+        df["symbol"] = df["Company"].apply(
+            lambda x: x.split("(")[-1].replace(")", "").strip()
+            if isinstance(x, str) and "(" in x and ")" in x
+            else None
+        )
 
-            # Prepare Div fields
-            records.append({
-                "company_name": row['Company'],
-                "symbol": symbol,
-                "dividend_ex_date": pd.to_datetime(row['Ex-Dividend Date'], errors='coerce').date() if pd.notna(row['Ex-Dividend Date']) else None,
-                "payment_date": pd.to_datetime(row['Payment Date'], errors='coerce').date() if pd.notna(row['Payment Date']) else None,
-                "dividend_rate": float(row['Dividend']) if pd.notna(row['Dividend']) else None,
-                "yield_percent": float(str(row['Yield']).rstrip('%')) if pd.notna(row['Yield']) else None,
-                # The rest can be None for now
-                "record_date": None,
-                "indicated_annual_dividend": None,
-                "announcement_date": None,
-                "latest_price": None,
-                "market_cap": None
-            })
+        return pd.DataFrame({
+            "company_name": df["Company"],
+            "symbol": df["symbol"],
+            "dividend_ex_date": pd.to_datetime(df["Ex-Dividend Date"], errors="coerce").dt.date,
+            "payment_date": pd.to_datetime(df["Payment Date"], errors="coerce").dt.date,
+            "dividend_rate": pd.to_numeric(df["Dividend"], errors="coerce"),
+            "yield_percent": (
+                df["Yield"]
+                .astype(str)
+                .str.rstrip("%")
+                .pipe(pd.to_numeric, errors="coerce")
+            ),
+            # fields Google doesn't have
+            "record_date": None,
+            "indicated_annual_dividend": None,
+            "announcement_date": None,
+            "latest_price": None,
+            "market_cap": None,
+        })
+    
 
-        return records
+    @staticmethod
+    async def from_google_to_pg(db: AsyncSession) -> int:
+        df_raw = grab_googlesheet_to_df()
+
+        if df_raw is None or df_raw.empty:
+            return 0
+
+        df = DivServicePg._from_google_to_df(df_raw)
+
+        return await DivDfLoader.upsert_df_symbol_only(db, df)
