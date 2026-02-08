@@ -23,7 +23,8 @@ class FinnhubClient:
             timeout=10,
         ).json()
         
-        print(symbol, quote, profile)
+        print("quote:--------", quote, profile)
+        print("profile    :--------", profile)
 
         return {
             "symbol": symbol,

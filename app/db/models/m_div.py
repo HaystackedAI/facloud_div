@@ -11,7 +11,6 @@ from app.db.models.m_base import Base, BaseMixin
 
 class Div(Base, BaseMixin):
     __tablename__ = "dividends"
-    __table_args__ = (Index("ix_dividends_symbol_exdate","symbol","dividend_ex_date",unique=True,),)
     
     company_name: Mapped[str] = mapped_column(String(255), nullable=True, index=True)
     symbol:       Mapped[str] = mapped_column(String(50), nullable=True, index=True,unique=True)
@@ -27,7 +26,10 @@ class Div(Base, BaseMixin):
     latest_price: Mapped[Decimal] = mapped_column(Numeric(10, 4),nullable=True,)
     yield_percent: Mapped[Decimal] = mapped_column(Numeric(5, 2),nullable=True,)
     market_cap: Mapped[Decimal] = mapped_column(Numeric(20, 2),nullable=True,)
-
+    
+    div_type:   Mapped[str] = mapped_column(String(255), nullable=True, index=True)
+    company_type:   Mapped[str] = mapped_column(String(255), nullable=True, index=True)
+    
 
 
 
