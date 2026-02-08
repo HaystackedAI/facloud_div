@@ -3,7 +3,7 @@ import time
 from decimal import Decimal
 from app.db.db_sync import get_db_sync_contextmanager
 from app.providers.finnhub_client import FinnhubClient
-from app.db.repo.repo_div_inject import get_by_symbol, update_market_data, get_all
+from app.db.repo.repo_div_inject import DividendRepo
 
 # Configurable limits
 FINNHUB_RATE_LIMIT_PER_MIN = 29  # free tier approx 60 calls/minute
@@ -23,10 +23,10 @@ def refresh_finnhub_market_data(symbol: str) -> dict:
 
     # Service handles DB session internally
     with get_db_sync_contextmanager() as db:
-        rows = get_by_symbol(db, symbol)
+        rows = DividendRepo.get_by_symbol(db, symbol)
         if not rows:
             raise LookupError(f"No dividend rows for symbol {symbol}")
-        updated = update_market_data(db, rows, latest_price, market_cap)
+        updated = DividendRepo.update_market_data(db, rows, latest_price, market_cap)
         db.commit()
 
     return {

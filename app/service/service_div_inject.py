@@ -2,16 +2,23 @@
 import csv, pandas as pd
 from datetime import datetime, date
 from datetime import date, timedelta
+from dateutil import parser
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.dialects.postgresql import insert
 from sqlalchemy import delete
 
 from app.db.models.m_div import Div  # your ORM model
+from app.db.repo.repo_div_inject import DividendRepo
 from app.service.ser_div_pg_load2pg import DivDfLoader
 from app.util.util_grab_div import grab_nasdaq_to_df, grab_googlesheet_to_df
 
 DATE_FMT = "%m/%d/%Y"  # Nasdaq CSV date format
 
+def parse_flexible_date(date_str):
+    try:
+        return parser.parse(date_str, fuzzy=True).date()
+    except:
+        return None
 
 class DivServicePg:
 
@@ -107,6 +114,20 @@ class DivServicePg:
         if df_raw is None or df_raw.empty:
             return 0
 
-        df = DivServicePg._from_google_to_df(df_raw)
+        for date_col in ['Ex-Dividend Date']:
+            if date_col in df_raw.columns:
+                df_raw[date_col] = df_raw[date_col].apply(parse_flexible_date)
 
-        return await DivDfLoader.upsert_df_symbol_only(db, df)
+        # Convert raw Google sheet DF to normalized Div DF
+        df = DivServicePg._from_google_to_df(df_raw)
+        df = df.drop_duplicates(subset=['symbol'], keep='last')
+
+        # Convert DF to list of dicts for bulk_upsert
+        records = df.to_dict(orient='records')
+        div_columns = ["company_name", "symbol", "dividend_ex_date", "dividend_rate", "yield_percent"]
+        records_cleaned = [{k: row[k] for k in div_columns} for row in records]
+        # Create repository instance
+        repo = DividendRepo(db)
+
+        # Call async bulk_upsert
+        return await repo.google_bulk_upsert(records_cleaned, conflict_keys=['symbol'])

@@ -1,4 +1,5 @@
 from datetime import date
+from decimal import Decimal
 import uuid
 from typing import Optional, Dict, Any, List, TYPE_CHECKING
 
@@ -18,14 +19,14 @@ class Div(Base, BaseMixin):
     dividend_ex_date: Mapped[date] = mapped_column(Date,nullable=True,index=True,)
     record_date: Mapped[date] = mapped_column(Date,nullable=True,)
     payment_date: Mapped[date] = mapped_column(Date,nullable=True,)
-    dividend_rate: Mapped[float] = mapped_column(Numeric(10, 4),nullable=True,)
-    indicated_annual_dividend: Mapped[float] = mapped_column(Numeric(10, 4),nullable=True,)
+    dividend_rate: Mapped[Decimal] = mapped_column(Numeric(10, 4),nullable=True,)
+    indicated_annual_dividend: Mapped[Decimal] = mapped_column(Numeric(10, 4),nullable=True,)
     announcement_date: Mapped[date] = mapped_column(Date,nullable=True,)
     
     # from finnhub
-    latest_price: Mapped[float] = mapped_column(Numeric(10, 4),nullable=True,)
-    yield_percent: Mapped[float] = mapped_column(Numeric(5, 2),nullable=True,)
-    market_cap: Mapped[float] = mapped_column(Numeric(20, 2),nullable=True,)
+    latest_price: Mapped[Decimal] = mapped_column(Numeric(10, 4),nullable=True,)
+    yield_percent: Mapped[Decimal] = mapped_column(Numeric(5, 2),nullable=True,)
+    market_cap: Mapped[Decimal] = mapped_column(Numeric(20, 2),nullable=True,)
 
 
 
