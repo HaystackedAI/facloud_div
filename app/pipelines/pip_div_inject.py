@@ -2,6 +2,7 @@ from datetime import date
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.service.service_div_inject import DivServicePg
 from app.service.ser_dividend_finnhub import refresh_all_finnhub_market_data, refresh_finnhub_market_data
+from app.db.repo.repo_div_inject import DividendRepo
 
 class DivPipeline:
 
@@ -22,22 +23,22 @@ class DivPipeline:
 
     @staticmethod
     async def run_monthly(db: AsyncSession) -> dict:
-        upserted = await DivServicePg.from_google_to_pg(db)
-        # enriched = refresh_all_finnhub_market_data()
+        repo = DividendRepo(db)
+        # upserted = await DivServicePg.from_google_to_pg(db)   #step 1. 
+        sync_type = await repo.sync_div_type_from_symbols()
         # pruned = await DivServicePg.pruen_marketcap_anomalies(db)
 
         return {
-            "upserted": upserted,
+            "upserted": "upserted",
         }
 
 
 
     @staticmethod
     async def run_yearly(db: AsyncSession) -> dict:
-        upserted = await DivServicePg.update_symbol_list(db)
-        # enriched = refresh_all_finnhub_market_data()
-        # pruned = await DivServicePg.pruen_marketcap_anomalies(db)
-
+        # save2csv = await grab_symbol_list_form_finnhub_to_csv()
+        # csv2pg = await DividendRepo(db).finnhub_symbol_upsert_loop_csv()
+        
         return {
-            "upserted": upserted,
+            "upserted": "upserted",
         }

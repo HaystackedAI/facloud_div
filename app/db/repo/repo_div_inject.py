@@ -4,7 +4,7 @@ from decimal import Decimal
 from pathlib import Path
 from typing import List
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select
+from sqlalchemy import select, update
 from sqlalchemy.engine import Result
 from sqlalchemy.dialects.postgresql import insert
 
@@ -132,3 +132,16 @@ class DividendRepo:
 
         await self.db.commit()
         return inserted_or_updated
+    
+
+    async def sync_div_type_from_symbols(self) -> int:
+        stmt = (
+            update(Div)
+            .where(Div.symbol == Symbols.symbol)
+            .values(div_type=Symbols.type)
+        )
+
+        result = await self.db.execute(stmt)
+        await self.db.commit()
+
+        return result.rowcount # type: ignore[attr-defined]
