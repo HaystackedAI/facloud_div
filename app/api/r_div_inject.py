@@ -15,12 +15,18 @@ from app.db.repo.repo_div_inject import DividendRepo
 injRou = APIRouter()
 
 
+@injRou.post("/div_hourlyrun", summary="Fetch hourly dividend data")
+async def run_hourly_pipeline(background_tasks: BackgroundTasks):
+    background_tasks.add_task(DivPipeline.run_hourly)
+    return {"status": "started", "message": "Hourly dividend pipeline started in background"}   
+
+
+
 @injRou.post("/div_dailyrun", summary="Fetch daily dividend data")
 async def run_daily_pipeline(
     db: AsyncSession = Depends(get_db),
 ):
     return await DivPipeline.run_daily(db, date.today())
-
 
 @injRou.post("/div_monthly_google_sheet")
 async def monthly_read_from_google_sheet(

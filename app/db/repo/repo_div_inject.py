@@ -138,7 +138,7 @@ class DividendRepo:
         stmt = (
             update(Div)
             .where(Div.symbol == Symbols.symbol)
-            .values(div_type=Symbols.type)
+            .values(company_type=Symbols.type)
         )
 
         result = await self.db.execute(stmt)

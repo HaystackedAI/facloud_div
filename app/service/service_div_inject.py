@@ -5,7 +5,7 @@ from datetime import date, timedelta
 from dateutil import parser
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.dialects.postgresql import insert
-from sqlalchemy import delete
+from sqlalchemy import delete, func
 
 from app.db.models.m_div import Div  # your ORM model
 from app.db.repo.repo_div_inject import DividendRepo
@@ -31,7 +31,7 @@ class DivServicePg:
 
 
     @staticmethod
-    async def pruen_marketcap_anomalies(db: AsyncSession) -> int:
+    async def prune_marketcap_anomalies(db: AsyncSession) -> int:
         MIN_MARKETCAP = 1_000        # 1B
         MAX_MARKETCAP = 5_000_000    # 5T
 
@@ -44,6 +44,21 @@ class DivServicePg:
         result = await db.execute(stmt)
         await db.commit()
         return result.closed
+
+
+    @staticmethod
+    async def prune_non_stock_type(db: AsyncSession) -> int:
+        EXCLUDED_DIV_TYPES = {"Closed-End Fund", "REIT", "PUBLIC"}
+        stmt = delete(Div).where(
+            (Div.div_type.is_(None)) |
+            (func.trim(Div.div_type) == "") |
+            (Div.div_type.in_(EXCLUDED_DIV_TYPES))
+        )
+
+        result = await db.execute(stmt)
+        await db.commit()
+
+        return result.rowcount or 0
 
 
     @staticmethod

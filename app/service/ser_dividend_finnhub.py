@@ -2,8 +2,10 @@
 import time
 from decimal import Decimal
 from app.db.db_sync import get_db_sync_contextmanager
+from app.db.models.m_div import Div
 from app.providers.finnhub_client import FinnhubClient
 from app.db.repo.repo_div_inject import DividendRepo
+
 
 # Configurable limits
 FINNHUB_RATE_LIMIT_PER_MIN = 29  # free tier approx 60 calls/minute
@@ -37,7 +39,7 @@ def refresh_finnhub_market_data(symbol: str) -> dict:
     }
 
 
-def refresh_all_finnhub_market_data() -> dict:
+def ___refresh_all_finnhub_market_data_old() -> dict:
     client = FinnhubClient()
 
     # Only fetch symbols (detached-safe)
@@ -94,4 +96,63 @@ def refresh_all_finnhub_market_data() -> dict:
     return {
         "symbols_processed": len(symbols),
         "results": results,
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+def refresh_all_finnhub_market_data() -> dict:
+    client = FinnhubClient()
+
+    with get_db_sync_contextmanager() as db:
+        divs = db.query(Div).all()
+
+        api_calls = 0
+        window_start = time.time()
+
+        updated = 0
+        skipped = 0
+
+        for div in divs:
+            if api_calls >= FINNHUB_RATE_LIMIT_PER_MIN:
+                elapsed = time.time() - window_start
+                if elapsed < 60:
+                    time.sleep(60 - elapsed)
+                api_calls = 0
+                window_start = time.time()
+
+            try:
+                data = client.get_quote_and_profile(div.symbol)
+
+                price = data.get("latest_price")
+                market_cap = data.get("market_cap")
+
+                if price is None or market_cap is None:
+                    skipped += 1
+                    continue
+
+                div.latest_price = Decimal(str(price))
+                div.market_cap = Decimal(str(market_cap))
+
+                updated += 1
+
+            except Exception:
+                skipped += 1
+
+            api_calls += 1
+
+        db.commit()
+
+    return {
+        "rows": len(divs),
+        "updated": updated,
+        "skipped": skipped,
     }

@@ -6,12 +6,29 @@ from app.db.repo.repo_div_inject import DividendRepo
 
 class DivPipeline:
 
+
+    @staticmethod
+    async def run_hourly(db: AsyncSession) -> dict:
+        enriched = refresh_all_finnhub_market_data()
+        # pruned = await DivServicePg.pruen_marketcap_anomalies(db)
+
+        return {
+            # "deleted_past": deleted,
+            # "upserted": upserted,
+            "enriched": enriched,
+            # "Anomaly": pruned,
+        }
+
+
+
+
     @staticmethod
     async def run_daily(db: AsyncSession, today: date) -> dict:
         deleted  = await DivServicePg.delete_past(db, today)
         upserted = await DivServicePg.from_nasdaq_2pg_4wk(db, today)
+        pruned_non_stock = await DivServicePg.prune_non_stock_type(db)  
         # enriched = refresh_all_finnhub_market_data()
-        # pruned = await DivServicePg.pruen_marketcap_anomalies(db)
+        # pruned = await DivServicePg.prune_marketcap_anomalies(db)
 
         return {
             "deleted_past": deleted,
@@ -25,7 +42,7 @@ class DivPipeline:
     async def run_monthly(db: AsyncSession) -> dict:
         repo = DividendRepo(db)
         # upserted = await DivServicePg.from_google_to_pg(db)   #step 1. 
-        # sync_type = await repo.sync_div_type_from_symbols()   #step 2.
+        sync_type = await repo.sync_div_type_from_symbols()   #step 2.
         # pruned = await DivServicePg.pruen_marketcap_anomalies(db)
 
         return {
@@ -42,3 +59,4 @@ class DivPipeline:
         return {
             "upserted": "upserted",
         }
+
