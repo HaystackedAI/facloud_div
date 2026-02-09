@@ -1,3 +1,5 @@
+"python.terminal.activateEnvironment": false
+
 # fastapicloud_dividend
 
 A project created with FastAPI CLI.
