@@ -10,14 +10,14 @@ class DivPipeline:
     async def run_daily(db: AsyncSession, today: date) -> dict:
         deleted  = await DivServicePg.delete_past(db, today)
         upserted = await DivServicePg.from_nasdaq_2pg_4wk(db, today)
-        enriched = refresh_all_finnhub_market_data()
-        pruned = await DivServicePg.pruen_marketcap_anomalies(db)
+        # enriched = refresh_all_finnhub_market_data()
+        # pruned = await DivServicePg.pruen_marketcap_anomalies(db)
 
         return {
             "deleted_past": deleted,
             "upserted": upserted,
-            "enriched": enriched,
-            "Anomaly": pruned,
+            # "enriched": enriched,
+            # "Anomaly": pruned,
         }
 
 
@@ -25,7 +25,7 @@ class DivPipeline:
     async def run_monthly(db: AsyncSession) -> dict:
         repo = DividendRepo(db)
         # upserted = await DivServicePg.from_google_to_pg(db)   #step 1. 
-        sync_type = await repo.sync_div_type_from_symbols()
+        # sync_type = await repo.sync_div_type_from_symbols()   #step 2.
         # pruned = await DivServicePg.pruen_marketcap_anomalies(db)
 
         return {
