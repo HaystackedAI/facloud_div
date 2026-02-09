@@ -1,5 +1,7 @@
 # app/repositories/dividend_repo.py
+import csv
 from decimal import Decimal
+from pathlib import Path
 from typing import List
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
@@ -7,6 +9,7 @@ from sqlalchemy.engine import Result
 from sqlalchemy.dialects.postgresql import insert
 
 from app.db.models.m_div import Div
+from app.db.models.m_symbols import Symbols
 
 
 class DividendRepo:
@@ -75,3 +78,57 @@ class DividendRepo:
 
         # Runtime-safe rowcount
         return getattr(result, "rowcount", 0)
+
+
+    async def finnhub_symbol_upsert_loop_csv(self) -> int:
+        inserted_or_updated = 0
+        csv_path = Path("data") / "finnhub_us_symbols.csv"
+
+        with csv_path.open("r", newline="", encoding="utf-8") as f:
+            reader = csv.DictReader(f)
+
+            for row in reader:
+                symbol_val = row.get("symbol")
+                if not symbol_val:
+                    continue  # skip empty symbol
+
+                # Check if symbol exists
+                result = await self.db.execute(select(Symbols).where(Symbols.symbol == symbol_val))
+                existing = result.scalars().first()
+
+                if existing:
+                    # Update all fields except id and symbol
+                    existing.symbol2 = row.get("symbol2")
+                    existing.type = row.get("type")
+                    existing.displaySymbol = row.get("displaySymbol")
+                    existing.currency = row.get("currency")
+                    existing.figi = row.get("figi")
+                    existing.isin = row.get("isin")
+                    existing.mic = row.get("mic")
+                    existing.shareClassFIGI = row.get("shareClassFIGI")
+                    existing.description = row.get("description")
+                else:
+                    # Insert new row
+                    new_obj = Symbols(
+                        symbol=symbol_val,
+                        symbol2=row.get("symbol2"),
+                        type=row.get("type"),
+                        displaySymbol=row.get("displaySymbol"),
+                        currency=row.get("currency"),
+                        figi=row.get("figi"),
+                        isin=row.get("isin"),
+                        mic=row.get("mic"),
+                        shareClassFIGI=row.get("shareClassFIGI"),
+                        description=row.get("description"),
+                    )
+                    self.db.add(new_obj)
+
+                inserted_or_updated += 1
+                print(inserted_or_updated, symbol_val)
+
+                # Optional: commit in batches to avoid memory issues
+                if inserted_or_updated % 500 == 0:
+                    await self.db.commit()
+
+        await self.db.commit()
+        return inserted_or_updated

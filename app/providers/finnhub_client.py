@@ -31,3 +31,14 @@ class FinnhubClient:
             "latest_price": quote.get("c"),
             "market_cap": profile.get("marketCapitalization"),
         }
+
+
+    def get_us_symbols(self) -> list[dict]:
+        """Fetch all US stock symbols (exchange=US)"""
+        resp = requests.get(
+            f"{FINNHUB_BASE}/stock/symbol",
+            params={"exchange": "US", "token": self.token},
+            timeout=100,
+        )
+        resp.raise_for_status()
+        return resp.json()

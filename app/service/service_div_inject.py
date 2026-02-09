@@ -10,7 +10,7 @@ from sqlalchemy import delete
 from app.db.models.m_div import Div  # your ORM model
 from app.db.repo.repo_div_inject import DividendRepo
 from app.service.ser_div_pg_load2pg import DivDfLoader
-from app.util.util_grab_div import grab_nasdaq_to_df, grab_googlesheet_to_df
+from app.util.util_grab_div import grab_nasdaq_to_df, grab_googlesheet_to_df, grab_symbol_list_form_finnhub
 
 DATE_FMT = "%m/%d/%Y"  # Nasdaq CSV date format
 
@@ -131,3 +131,11 @@ class DivServicePg:
 
         # Call async bulk_upsert
         return await repo.google_bulk_upsert(records_cleaned, conflict_keys=['symbol'])
+
+
+    @staticmethod
+    async def update_symbol_list(db: AsyncSession) -> int:
+        symbol_list = await  grab_symbol_list_form_finnhub()
+
+        upserted = await DividendRepo(db).finnhub_symbol_bulk_upsert(symbol_list)
+        return upserted

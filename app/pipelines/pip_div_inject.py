@@ -29,3 +29,15 @@ class DivPipeline:
         return {
             "upserted": upserted,
         }
+
+
+
+    @staticmethod
+    async def run_yearly(db: AsyncSession) -> dict:
+        upserted = await DivServicePg.update_symbol_list(db)
+        # enriched = refresh_all_finnhub_market_data()
+        # pruned = await DivServicePg.pruen_marketcap_anomalies(db)
+
+        return {
+            "upserted": upserted,
+        }
