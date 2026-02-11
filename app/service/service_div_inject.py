@@ -27,7 +27,7 @@ class DivServicePg:
         stmt = delete(Div).where(Div.dividend_ex_date < today)
         result = await db.execute(stmt)
         await db.commit()
-        return result.closed
+        return result.rowcount 
 
 
     @staticmethod
