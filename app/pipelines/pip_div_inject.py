@@ -1,5 +1,6 @@
 from datetime import date
 from sqlalchemy.ext.asyncio import AsyncSession
+from app.db.pg_conn import get_db_auto
 from app.service.service_div_inject import DivServicePg
 from app.service.ser_dividend_finnhub import refresh_all_finnhub_market_data, refresh_finnhub_market_data
 from app.db.repo.repo_div_inject import DividendRepo
@@ -18,6 +19,24 @@ class DivPipeline:
             "enriched": enriched,
             # "Anomaly": pruned,
         }
+
+
+    @staticmethod
+    async def run_daily_background(today: date) -> dict:
+        async with get_db_auto() as db:
+            deleted  = await DivServicePg.delete_past(db, today)
+            upserted = await DivServicePg.from_nasdaq_2pg_4wk(db, today)
+            pruned_non_stock = await DivServicePg.prune_non_stock_type(db)  
+            # enriched = refresh_all_finnhub_market_data()
+            # pruned = await DivServicePg.prune_marketcap_anomalies(db)
+
+            return {
+                "deleted_past": deleted,
+                "upserted": upserted,
+                # "enriched": enriched,
+                # "Anomaly": pruned,
+            }
+
 
 
 

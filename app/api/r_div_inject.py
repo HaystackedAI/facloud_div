@@ -21,14 +21,22 @@ async def run_hourly_pipeline(background_tasks: BackgroundTasks):
     return {"status": "started", "message": "Hourly dividend pipeline started in background"}   
 
 
+
 @injRou.post("/div_dailyrun", summary="Fetch daily dividend data")
 async def run_daily_pipeline(
-    run_background_tasks: BackgroundTasks,
     db: AsyncSession = Depends(get_db),
 ):
-    run_background_tasks.add_task(DivPipeline.run_daily(db, date.today()))
+    return await DivPipeline.run_daily(db, date.today())
+
+
+@injRou.post("/div_dailyrun_background", summary="Fetch daily dividend data")
+async def run_daily_pipeline(
+    run_background_tasks: BackgroundTasks,
+):
+    run_background_tasks.add_task(DivPipeline.run_daily_background, date.today())
     return {"status": "started", "message": "Daily dividend pipeline started in background"}
-    
+
+
 
 @injRou.post("/div_monthly_google_sheet")
 async def monthly_read_from_google_sheet(

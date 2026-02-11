@@ -24,7 +24,7 @@ class DivServicePg:
 
     @staticmethod
     async def delete_past(db: AsyncSession, today: date) -> int:
-        stmt = delete(Div).where(Div.dividend_ex_date < today)
+        stmt = delete(Div).where(Div.dividend_ex_date <= today)
         result = await db.execute(stmt)
         await db.commit()
         return result.rowcount 
