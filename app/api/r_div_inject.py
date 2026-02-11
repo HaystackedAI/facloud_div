@@ -43,22 +43,22 @@ async def yearly_exchange_list(
 
 
 
-@injRou.post("/finnhub-update-price", summary="Update price once per hour. ")
-def update_all_finnhub():
-    try:
-        return refresh_all_finnhub_market_data()
+# @injRou.post("/finnhub-update-price", summary="Update price once per hour. ")
+# def update_all_finnhub():
+#     try:
+#         return refresh_all_finnhub_market_data()
 
-    except ValueError as e:
-        raise HTTPException(status_code=502, detail=str(e))
+#     except ValueError as e:
+#         raise HTTPException(status_code=502, detail=str(e))
 
 
-@injRou.post("/finnhub-background")
-def update_all_finnhub_bg(background_tasks: BackgroundTasks):
-    background_tasks.add_task(refresh_all_finnhub_market_data)
-    return {
-        "status": "started",
-        "message": "Finnhub refresh job started in background"
-    }
+# @injRou.post("/finnhub-background")
+# def update_all_finnhub_bg(background_tasks: BackgroundTasks):
+#     background_tasks.add_task(refresh_all_finnhub_market_data)
+#     return {
+#         "status": "started",
+#         "message": "Finnhub refresh job started in background"
+#     }
 
 
 
