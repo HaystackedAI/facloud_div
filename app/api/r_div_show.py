@@ -8,26 +8,17 @@ from app.db.db_async import get_db
 from app.service.ser_div_az_search import search_dividends
 from app.service.ser_div_show import DivService
 from app.service.ser_az_data_lake import list_files, write_json
-security = HTTPBasic()
-
-def require_password(credentials: HTTPBasicCredentials = Depends(security),):
-    correct_pass = secrets.compare_digest(credentials.password,os.environ["ADMIN_PASSWORD"],)
-    if not correct_pass:return
-
-
-AdminDeps = Depends(require_password)
-
 
 divRou = APIRouter()
 
 
-@divRou.get("/", dependencies=[AdminDeps])
+@divRou.get("/list")
 async def list_divs(db: AsyncSession = Depends(get_db),):
     return await DivService.list_divs(db)
 
 
 @divRou.get("/emb")
-async def list_divs_emb(db: AsyncSession = Depends(get_db), dependencies=[AdminDeps]):
+async def list_divs_emb(db: AsyncSession = Depends(get_db),):
     return await DivService.list_divs_emb(db)
 
 

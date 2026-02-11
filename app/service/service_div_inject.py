@@ -1,11 +1,12 @@
 # app/service/ser_dividend_load.py
-import csv, pandas as pd
+import csv
+import pandas as pd
 from datetime import datetime, date
 from datetime import date, timedelta
 from dateutil import parser
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.dialects.postgresql import insert
-from sqlalchemy import delete, func
+from sqlalchemy import delete, func, or_
 
 from app.db.models.m_div import Div  # your ORM model
 from app.db.repo.repo_div_inject import DividendRepo
@@ -14,11 +15,13 @@ from app.util.util_grab_div import grab_nasdaq_to_df, grab_googlesheet_to_df, gr
 
 DATE_FMT = "%m/%d/%Y"  # Nasdaq CSV date format
 
+
 def parse_flexible_date(date_str):
     try:
         return parser.parse(date_str, fuzzy=True).date()
     except:
         return None
+
 
 class DivServicePg:
 
@@ -27,8 +30,20 @@ class DivServicePg:
         stmt = delete(Div).where(Div.dividend_ex_date <= today)
         result = await db.execute(stmt)
         await db.commit()
-        return result.rowcount 
+        return result.rowcount
 
+    @staticmethod
+    async def delete_preferred(db: AsyncSession) -> int:
+        stmt = delete(Div).where(
+            or_(
+                Div.company_name.ilike("%Preferred Unit%"),
+                Div.company_name.ilike("%Preferred S%"),
+                Div.company_name.ilike("%ETN%"),
+            )
+        )
+        result = await db.execute(stmt)
+        await db.commit()
+        return result.rowcount
 
     @staticmethod
     async def prune_marketcap_anomalies(db: AsyncSession) -> int:
@@ -45,7 +60,6 @@ class DivServicePg:
         await db.commit()
         return result.closed
 
-
     @staticmethod
     async def prune_non_stock_type(db: AsyncSession) -> int:
         EXCLUDED_DIV_TYPES = {"Closed-End Fund", "REIT", "PUBLIC"}
@@ -60,13 +74,12 @@ class DivServicePg:
 
         return result.rowcount or 0
 
-
     @staticmethod
     async def from_nasdaq_2pg_4wk(db: AsyncSession, today: date) -> int:
         total = 0
         start = today
-        weeks = 4
-        end = start + timedelta(weeks = weeks)
+        weeks = 6
+        end = start + timedelta(weeks=weeks)
 
         cur = start
         print("start:", start, "end:", end)
@@ -89,7 +102,6 @@ class DivServicePg:
 
         return total
 
-    
     @staticmethod
     def _from_google_to_df(df: pd.DataFrame) -> pd.DataFrame:
         df = df.copy()
@@ -120,10 +132,9 @@ class DivServicePg:
             "latest_price": None,
             "market_cap": None,
         })
-    
 
     @staticmethod
-    async def from_google_to_pg(db: AsyncSession) -> int:
+    async def from_google_sheet_to_pg(db: AsyncSession) -> int:
         df_raw = grab_googlesheet_to_df()
 
         if df_raw is None or df_raw.empty:
@@ -135,11 +146,15 @@ class DivServicePg:
 
         # Convert raw Google sheet DF to normalized Div DF
         df = DivServicePg._from_google_to_df(df_raw)
+        df["dividend_rate"] = pd.to_numeric(
+            df["dividend_rate"], errors="coerce")
+        df = df[df["dividend_rate"] > 0]
         df = df.drop_duplicates(subset=['symbol'], keep='last')
 
         # Convert DF to list of dicts for bulk_upsert
         records = df.to_dict(orient='records')
-        div_columns = ["company_name", "symbol", "dividend_ex_date", "dividend_rate", "yield_percent"]
+        div_columns = ["company_name", "symbol",
+                       "dividend_ex_date", "dividend_rate", "yield_percent"]
         records_cleaned = [{k: row[k] for k in div_columns} for row in records]
         # Create repository instance
         repo = DividendRepo(db)
@@ -147,10 +162,9 @@ class DivServicePg:
         # Call async bulk_upsert
         return await repo.google_bulk_upsert(records_cleaned, conflict_keys=['symbol'])
 
-
     @staticmethod
     async def update_symbol_list(db: AsyncSession) -> int:
-        symbol_list = await  grab_symbol_list_form_finnhub()
+        symbol_list = await grab_symbol_list_form_finnhub()
 
         upserted = await DividendRepo(db).finnhub_symbol_bulk_upsert(symbol_list)
         return upserted

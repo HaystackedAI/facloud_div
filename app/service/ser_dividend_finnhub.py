@@ -123,6 +123,7 @@ def refresh_all_finnhub_market_data() -> dict:
 
         for div in divs:
             if api_calls >= FINNHUB_RATE_LIMIT_PER_MIN:
+                print(f"Rate limit reached, sleeping ")
                 elapsed = time.time() - window_start
                 if elapsed < 60:
                     time.sleep(60 - elapsed)
