@@ -29,10 +29,8 @@ async def run_daily_pipeline(
     return await DivPipeline.run_daily(db, date.today())
 
 
-@injRou.post("/div_dailyrun_background", summary="Fetch daily dividend data")
-async def run_daily_pipeline(
-    run_background_tasks: BackgroundTasks,
-):
+@injRou.post("/div_dailyrun_background", summary="Fetch daily dividend data in background")
+async def run_daily_pipeline_background(    run_background_tasks: BackgroundTasks,):
     run_background_tasks.add_task(DivPipeline.run_daily_background, date.today())
     return {"status": "started", "message": "Daily dividend pipeline started in background"}
 
