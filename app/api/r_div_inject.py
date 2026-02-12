@@ -5,11 +5,7 @@ from fastapi import BackgroundTasks
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.db.db_async import get_db
-from app.util.util_grab_div import grab_symbol_list_form_finnhub_to_csv
-from app.service.ser_dividend_finnhub import refresh_all_finnhub_market_data, refresh_finnhub_market_data
 from app.pipelines.pip_div_inject import DivPipeline
-from app.db.repo.repo_div_inject import DividendRepo
-# from app.service.ser_az_data_lake import list_files, write_json
 
 
 injRou = APIRouter()
@@ -40,26 +36,5 @@ async def yearly_exchange_list(
     db: AsyncSession = Depends(get_db),
 ):
     return await DivPipeline.run_yearly(db)
-
-
-
-# @injRou.post("/finnhub-update-price", summary="Update price once per hour. ")
-# def update_all_finnhub():
-#     try:
-#         return refresh_all_finnhub_market_data()
-
-#     except ValueError as e:
-#         raise HTTPException(status_code=502, detail=str(e))
-
-
-# @injRou.post("/finnhub-background")
-# def update_all_finnhub_bg(background_tasks: BackgroundTasks):
-#     background_tasks.add_task(refresh_all_finnhub_market_data)
-#     return {
-#         "status": "started",
-#         "message": "Finnhub refresh job started in background"
-#     }
-
-
 
 
