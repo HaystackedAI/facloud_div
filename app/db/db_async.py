@@ -16,13 +16,28 @@ AsyncSessionLocal = async_sessionmaker(
     expire_on_commit=False,
 )
 
+# 原有的get_db（裸session，需要手动管理事务）
 async def get_db() -> AsyncGenerator[AsyncSession, None]:
     async with AsyncSessionLocal() as session:
         yield session
         
         
-# @router.get("/users")
-# async def read_users(db: AsyncSession = Depends(get_db)):
-#     result = await db.execute("SELECT id, name FROM users")
-#     users = result.fetchall()
-#     return users
+# 新增的get_db_auto（自动事务管理）
+AsyncSessionFactory = async_sessionmaker(async_engine, expire_on_commit=False,)
+async def get_db_auto() -> AsyncGenerator[AsyncSession, None]:
+    async with AsyncSessionFactory() as session:
+        try:
+            # 关键：自动开始事务
+            async with session.begin():
+                yield session
+            # 这里自动提交（如果没有异常）
+        except Exception:
+            # 这里自动回滚（session.begin()自动处理）
+            raise
+        finally:
+            await session.close()
+            
+            
+            
+
+
